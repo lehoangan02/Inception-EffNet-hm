@@ -2,7 +2,7 @@
 #SBATCH --job-name=efv2_train_test
 #SBATCH --output=efv2_train_test2.log
 #SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=4
 #SBATCH --mem=40G
 #SBATCH --time=48:00:00
 
@@ -45,10 +45,11 @@ fi
 python main.py \
   --data_dir /media02/hvtham/DATA/BridgeTrain \
   --num_epoch 50 \
-  --batch_size 7 \
+  --batch_size 5 \
   --dataset dota \
   --phase train \
-  --conf_thresh 0.1
+  --conf_thresh 0.1 \
+  --resume_train ./weights_dota/model_36.pth
 
 end_time=$(date +%s)
 
