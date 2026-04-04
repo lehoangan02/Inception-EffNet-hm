@@ -30,7 +30,7 @@ export PYTHONPATH=$PROJECT_DIR:$DEVKIT_DIR:${PYTHONPATH:-}
 
 python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
 
-for i in $(seq 37 45); do
+for i in $(seq 38 50); do
   echo "========================================"
   echo "Evaluating model_${i}.pth"
   echo "========================================"

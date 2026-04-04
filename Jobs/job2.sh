@@ -49,7 +49,7 @@ python main.py \
   --dataset dota \
   --phase train \
   --conf_thresh 0.1 \
-  --resume_train ./weights_dota/model_36.pth
+  --resume_train ./weights_dota/model_49.pth
 
 end_time=$(date +%s)
 
