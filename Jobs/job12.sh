@@ -111,7 +111,7 @@ while true; do
     main.py
     --data_dir /workspace/DATA/BridgeTrain
     --num_epoch "$session_end_epoch"
-    --batch_size 10
+    --batch_size 15
     --dataset dota
     --phase train
     --conf_thresh 0.1

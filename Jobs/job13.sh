@@ -40,7 +40,7 @@ for i in $(seq 1 50); do
 
   python main.py \
     --data_dir "/workspace/DATA/Validate_DOTA_1_0.5" \
-    --batch_size 10 \
+    --batch_size 15 \
     --dataset dota \
     --phase eval \
     --conf_thresh 0.1 \
