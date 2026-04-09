@@ -12,7 +12,7 @@ echo "========================================"
 
 start_time=$(date +%s)
 
-PROJECT_DIR=$HOME/Improving-Oriented-Object-Detection-in-Aerial-Images-Using-Inception-Enhanced-EfficientNetV2-XL-with
+PROJECT_DIR=/workspace/Improving-Oriented-Object-Detection-in-Aerial-Images-Using-Inception-Enhanced-EfficientNetV2-XL-with
 DEVKIT_DIR=$PROJECT_DIR/datasets/DOTA_devkit
 WEIGHTS_DIR=$PROJECT_DIR/weights_dota
 OUTPUT_DIR=$PROJECT_DIR/eval_results
@@ -39,8 +39,8 @@ for i in $(seq 1 50); do
   fi
 
   python main.py \
-    --data_dir "$HOME/DATA/Validate_DOTA_1_0.5" \
-    --batch_size 16 \
+    --data_dir "/workspace/DATA/Validate_DOTA_1_0.5" \
+    --batch_size 10 \
     --dataset dota \
     --phase eval \
     --conf_thresh 0.1 \

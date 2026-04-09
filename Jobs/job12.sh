@@ -12,7 +12,7 @@ echo "========================================"
 
 start_time=$(date +%s)
 
-PROJECT_DIR=$HOME/Improving-Oriented-Object-Detection-in-Aerial-Images-Using-Inception-Enhanced-EfficientNetV2-XL-with
+PROJECT_DIR=/workspace/Improving-Oriented-Object-Detection-in-Aerial-Images-Using-Inception-Enhanced-EfficientNetV2-XL-with
 DEVKIT_DIR=$PROJECT_DIR/datasets/DOTA_devkit
 CKPT_DIR=$PROJECT_DIR/weights_dota
 TARGET_EPOCH=50
@@ -109,9 +109,9 @@ while true; do
 
   TRAIN_CMD=(
     main.py
-    --data_dir $HOME/DATA/BridgeTrain
+    --data_dir /workspace/DATA/BridgeTrain
     --num_epoch "$session_end_epoch"
-    --batch_size 5
+    --batch_size 10
     --dataset dota
     --phase train
     --conf_thresh 0.1
