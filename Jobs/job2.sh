@@ -44,12 +44,12 @@ fi
 
 python main.py \
   --data_dir /media02/hvtham/DATA/BridgeTrain \
-  --num_epoch 50 \
+  --num_epoch 10 \
   --batch_size 5 \
   --dataset dota \
   --phase train \
   --conf_thresh 0.1 \
-  --resume_train ./weights_dota/model_49.pth
+  --pretrained \
 
 end_time=$(date +%s)
 

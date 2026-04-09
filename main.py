@@ -26,6 +26,11 @@ def parse_args():
     parser.add_argument('--data_dir', type=str, default='../Datasets/dota', help='Data directory')
     parser.add_argument('--phase', type=str, default='eval', help='Phase choice= {train, test, eval}')
     parser.add_argument('--wh_channels', type=int, default=8, help='Number of channels for the vectors (4x2)')
+    parser.add_argument('--pretrained', dest='pretrained', action='store_true',
+                        help='Use ImageNet-pretrained EfficientNetV2 backbone weights')
+    parser.add_argument('--no-pretrained', dest='pretrained', action='store_false',
+                        help='Disable pretrained backbone weights (recommended on offline clusters)')
+    parser.set_defaults(pretrained=False)
     args = parser.parse_args()
     return args
 
@@ -40,7 +45,7 @@ if __name__ == '__main__':
              }
     down_ratio = 4
     model = ctrbox_net.CTRBOX_EfficientNetV2(heads=heads,
-                              pretrained=True,
+                              pretrained=args.pretrained,
                               down_ratio=down_ratio,
                               final_kernel=1,
                               head_conv=256)

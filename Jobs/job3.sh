@@ -30,7 +30,7 @@ export PYTHONPATH=$PROJECT_DIR:$DEVKIT_DIR:${PYTHONPATH:-}
 
 python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
 
-for i in $(seq 38 50); do
+for i in $(seq 21 50); do
   echo "========================================"
   echo "Evaluating model_${i}.pth"
   echo "========================================"
@@ -42,7 +42,7 @@ for i in $(seq 38 50); do
   fi
 
   python main.py \
-    --data_dir /media02/hvtham/DATA/Validate_1_0.5_600_100 \
+    --data_dir /media02/hvtham/DATA/Validate_DOTA_1_0.5 \
     --batch_size 16 \
     --dataset dota \
     --phase eval \
