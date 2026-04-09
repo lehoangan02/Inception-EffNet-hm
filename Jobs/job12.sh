@@ -12,10 +12,7 @@ echo "========================================"
 
 start_time=$(date +%s)
 
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate /media02/hvtham/conda_envs/myenv
-
-PROJECT_DIR=/media02/hvtham/BBAV/Improving-Oriented-Object-Detection-in-Aerial-Images-Using-Inception-Enhanced-EfficientNetV2-XL-with
+PROJECT_DIR=$HOME/Improving-Oriented-Object-Detection-in-Aerial-Images-Using-Inception-Enhanced-EfficientNetV2-XL-with
 DEVKIT_DIR=$PROJECT_DIR/datasets/DOTA_devkit
 CKPT_DIR=$PROJECT_DIR/weights_dota
 TARGET_EPOCH=50
@@ -112,7 +109,7 @@ while true; do
 
   TRAIN_CMD=(
     main.py
-    --data_dir /media02/hvtham/DATA/BridgeTrain
+    --data_dir $HOME/DATA/BridgeTrain
     --num_epoch "$session_end_epoch"
     --batch_size 5
     --dataset dota
