@@ -98,12 +98,18 @@ class TrainModule(object):
         
         # add resume part for continuing training when break previously, 10-16-2020
         if args.resume_train:
-            self.model, self.optimizer, start_epoch = self.load_model(self.model, 
-                                                                        self.optimizer, 
-                                                                        args.resume_train, 
+            self.model, self.optimizer, start_epoch = self.load_model(self.model,
+                                                                        self.optimizer,
+                                                                        args.resume_train,
                                                                         strict=True)
             start_epoch += 1
-        # end 
+            if getattr(args, 'reset_lr', False):
+                for pg in self.optimizer.param_groups:
+                    pg['lr'] = args.init_lr
+                self.scheduler = torch.optim.lr_scheduler.ExponentialLR(
+                    self.optimizer, gamma=0.96, last_epoch=-1)
+                print('LR reset to {} (fresh schedule)'.format(args.init_lr))
+        # end
 
         if not os.path.exists(save_path):
             os.mkdir(save_path)
@@ -114,7 +120,7 @@ class TrainModule(object):
                 self.model = nn.DataParallel(self.model)
         self.model.to(self.device)
 
-        criterion = loss.LossAll()
+        criterion = loss.LossAll(heatmap_only=getattr(args, 'heatmap_only', False))
         print('Setting up data...')
 
         dataset_module = self.dataset[args.dataset]

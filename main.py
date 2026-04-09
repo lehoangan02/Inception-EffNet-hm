@@ -31,6 +31,10 @@ def parse_args():
     parser.add_argument('--no-pretrained', dest='pretrained', action='store_false',
                         help='Disable pretrained backbone weights (recommended on offline clusters)')
     parser.set_defaults(pretrained=False)
+    parser.add_argument('--heatmap_only', action='store_true',
+                        help='Use heatmap (focal) loss only, skip wh/offset/theta losses')
+    parser.add_argument('--reset_lr', action='store_true',
+                        help='Reset LR to init_lr after resuming checkpoint (as if starting fresh)')
     args = parser.parse_args()
     return args
 
