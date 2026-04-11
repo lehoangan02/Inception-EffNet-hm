@@ -14,7 +14,7 @@ start_time=$(date +%s)
 
 PROJECT_DIR=/workspace/Improving-Oriented-Object-Detection-in-Aerial-Images-Using-Inception-Enhanced-EfficientNetV2-XL-with
 DEVKIT_DIR=$PROJECT_DIR/datasets/DOTA_devkit
-WEIGHTS_DIR=$PROJECT_DIR/DATA/weights_dota
+WEIGHTS_DIR=$PROJECT_DIR/weights_dota
 OUTPUT_DIR=$PROJECT_DIR/eval_results
 
 mkdir -p "$OUTPUT_DIR"
