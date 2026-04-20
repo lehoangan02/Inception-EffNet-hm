@@ -25,7 +25,10 @@ def parse_args():
     parser.add_argument('--resume', type=str, default='model_50.pth', help='Weights resumed in testing and evaluation')
     parser.add_argument('--dataset', type=str, default='dota', help='Name of dataset')
     parser.add_argument('--data_dir', type=str, default='../Datasets/dota', help='Data directory')
-    parser.add_argument('--phase', type=str, default='eval', help='Phase choice= {train, test, eval}')
+    parser.add_argument('--phase', type=str, default='eval', choices=['train', 'test', 'eval', 'loss'],
+                        help='Phase choice= {train, test, eval, loss}')
+    parser.add_argument('--loss_epochs', type=int, nargs='+', default=[9, 10],
+                        help='Checkpoint epochs to evaluate loss for when --phase loss is used')
     parser.add_argument('--wh_channels', type=int, default=8, help='Number of channels for the vectors (4x2)')
     parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                         help='Use ImageNet-pretrained EfficientNetV2 backbone weights')
@@ -99,6 +102,13 @@ if __name__ == '__main__':
                                        down_ratio=down_ratio)
 
         ctrbox_obj.train_network(args)
+    elif args.phase == 'loss':
+        ctrbox_obj = train.TrainModule(dataset=dataset,
+                                       num_classes=num_classes,
+                                       model=model,
+                                       decoder=decoder,
+                                       down_ratio=down_ratio)
+        ctrbox_obj.calculate_checkpoint_losses(args)
     elif args.phase == 'test':
         ctrbox_obj = test.TestModule(dataset=dataset, num_classes=num_classes, model=model, decoder=decoder)
         ctrbox_obj.test(args, down_ratio=down_ratio)

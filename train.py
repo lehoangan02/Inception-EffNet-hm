@@ -80,14 +80,18 @@ class TrainModule(object):
                     print('No param {}.'.format(k))
                     state_dict[k] = model_state_dict[k]
         model.load_state_dict(state_dict, strict=False)
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        for state in optimizer.state.values():
-            for k, v in state.items():
-                if isinstance(v, torch.Tensor):
-                    state[k] = v.cuda()
+        if optimizer is not None:
+            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            for state in optimizer.state.values():
+                for k, v in state.items():
+                    if isinstance(v, torch.Tensor):
+                        state[k] = v.cuda()
         epoch = checkpoint['epoch']
         # loss = checkpoint['loss']
         return model, optimizer, epoch
+
+    def load_checkpoint_for_loss(self, model, resume, strict=True):
+        return self.load_model(model, None, resume, strict=strict)
 
     def train_network(self, args):
 
@@ -164,6 +168,53 @@ class TrainModule(object):
                             epoch,
                             self.model,
                             self.optimizer)
+
+    def calculate_checkpoint_losses(self, args):
+        if args.backend == 'coreml':
+            raise ValueError('Core ML backend is inference-only and cannot be used for loss calculation.')
+
+        save_path = 'weights_' + args.dataset
+        if not os.path.exists(save_path):
+            os.mkdir(save_path)
+
+        self.model.to(self.device)
+        criterion = loss.LossAll(heatmap_only=getattr(args, 'heatmap_only', False))
+        print('Setting up data...')
+
+        dsets = {x: DOTA(data_dir=args.data_dir,
+                         phase=x,
+                         input_h=args.input_h,
+                         input_w=args.input_w,
+                         down_ratio=self.down_ratio)
+                 for x in self.dataset_phase[args.dataset]}
+        data_loader = torch.utils.data.DataLoader(dsets['train'],
+                                                  batch_size=args.batch_size,
+                                                  shuffle=False,
+                                                  num_workers=args.num_workers,
+                                                  pin_memory=True,
+                                                  drop_last=False,
+                                                  collate_fn=collater)
+
+        records = []
+        for epoch in args.loss_epochs:
+            checkpoint_path = os.path.join(save_path, 'model_{}.pth'.format(epoch))
+            if not os.path.exists(checkpoint_path):
+                print('Skipping missing checkpoint {}'.format(checkpoint_path))
+                continue
+
+            self.load_checkpoint_for_loss(self.model, checkpoint_path, strict=True)
+            self.model.to(self.device)
+            print('Calculating loss for checkpoint epoch {}'.format(epoch))
+            epoch_loss = self.run_epoch(phase='eval',
+                                        data_loader=data_loader,
+                                        criterion=criterion)
+            records.append((epoch, epoch_loss))
+
+        if records:
+            loss_path = os.path.join(save_path, 'checkpoint_losses.txt')
+            np.savetxt(loss_path, np.array(records), fmt=['%d', '%.6f'])
+            print('Saved checkpoint losses to {}'.format(loss_path))
+        return records
 
     def run_epoch(self, phase, data_loader, criterion):
         if phase == 'train':

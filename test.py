@@ -116,8 +116,8 @@ class TestModule(object):
             print(torch.backends.mps.is_available())
             if self.device.type == 'cuda':
                 torch.cuda.synchronize(self.device)
-            elif self.device.type == 'mps':
-                torch.backends.mps.synchronize()
+            elif self.device.type == 'mps' and hasattr(torch, 'mps') and hasattr(torch.mps, 'synchronize'):
+                torch.mps.synchronize()
             decoded_pts = []
             decoded_scores = []
             predictions = self.decoder.ctdet_decode(pr_decs)
