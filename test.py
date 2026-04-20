@@ -21,7 +21,11 @@ class TestModule(object):
     def __init__(self, dataset, num_classes, model, decoder):
         torch.manual_seed(317)
         print(torch.cuda.is_available())
-        self.device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu"))        
+        self.backend = 'coreml' if model.__class__.__name__ == 'CoreMLModelRunner' else 'pytorch'
+        if self.backend == 'coreml':
+            self.device = torch.device('cpu')
+        else:
+            self.device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu"))
         print(self.device)
         self.dataset = dataset
         self.num_classes = num_classes
@@ -79,8 +83,9 @@ class TestModule(object):
 
 
     def test(self, args, down_ratio):
-        save_path = 'weights_'+args.dataset
-        self.model = self.load_model(self.model, os.path.join(save_path, args.resume))
+        if self.backend != 'coreml':
+            save_path = 'weights_'+args.dataset
+            self.model = self.load_model(self.model, os.path.join(save_path, args.resume))
         self.model = self.model.to(self.device)
         self.model.eval()
 
@@ -109,9 +114,9 @@ class TestModule(object):
             # lehoangan changed here
             print(torch.cuda.is_available())
             print(torch.backends.mps.is_available())
-            if torch.cuda.is_available():
+            if self.device.type == 'cuda':
                 torch.cuda.synchronize(self.device)
-            elif torch.backends.mps.is_available():
+            elif self.device.type == 'mps':
                 torch.backends.mps.synchronize()
             decoded_pts = []
             decoded_scores = []

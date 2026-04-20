@@ -1,0 +1,7 @@
+classname: plane
+No detections found.
+ap:  0
+classname: baseball-diamond
+No detections found.
+ap:  0
+classname: bridge

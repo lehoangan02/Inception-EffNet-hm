@@ -69,9 +69,9 @@ def write_results(args,
         decoded_pts = []
         decoded_scores = []
         # lehoangan changed here
-        if torch.cuda.is_available():
+        if device.type == 'cuda':
             torch.cuda.synchronize(device)
-        elif torch.backends.mps.is_available():
+        elif device.type == 'mps':
             torch.mps.synchronize()
         predictions = decoder.ctdet_decode(pr_decs)
         pts0, scores0 = decode_prediction(predictions, dsets, args, img_id, down_ratio)
