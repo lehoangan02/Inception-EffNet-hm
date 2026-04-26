@@ -1,0 +1,6 @@
+Run started: Fri Apr 24 17:51:36 +07 2026
+MAP output directory: /Users/lehoangan/Documents/GitHub/BBAV/Improving-Oriented-Object-Detection-in-Aerial-Images-Using-Inception-Enhanced-EfficientNetV2-XL-with/eval_results/608_attempt_pretrain_5
+model_1 map: 0.0
+model_2 map: 0.0
+model_3 map: 0.0
+model_4 map: 0.0

@@ -1,0 +1,64 @@
+classname: plane
+check tp [1. 1. 1. ... 0. 0. 0.]
+npos num: 2450
+ap:  0.8934241385405832
+classname: baseball-diamond
+check tp [1. 1. 1. ... 0. 0. 0.]
+npos num: 209
+ap:  0.587562139026761
+classname: bridge
+check tp [1. 1. 1. ... 0. 0. 0.]
+npos num: 424
+ap:  0.363460482391825
+classname: ground-track-field
+check tp [1. 1. 1. ... 0. 0. 0.]
+npos num: 131
+ap:  0.5553167864363763
+classname: small-vehicle
+check tp [1. 1. 1. ... 0. 0. 0.]
+npos num: 5090
+ap:  0.6863702601877509
+classname: large-vehicle
+check tp [0. 1. 1. ... 0. 0. 0.]
+npos num: 4293
+ap:  0.8068520260474502
+classname: ship
+check tp [1. 1. 1. ... 0. 0. 0.]
+npos num: 8861
+ap:  0.8112129458197659
+classname: tennis-court
+check tp [1. 1. 1. ... 0. 0. 0.]
+npos num: 739
+ap:  0.9071917999241939
+classname: basketball-court
+check tp [1. 1. 1. ... 0. 0. 0.]
+npos num: 124
+ap:  0.6150380489587373
+classname: storage-tank
+check tp [1. 1. 1. ... 0. 0. 0.]
+npos num: 1869
+ap:  0.8566266060659726
+classname: soccer-ball-field
+check tp [1. 1. 1. ... 0. 0. 0.]
+npos num: 87
+ap:  0.6090260268745523
+classname: roundabout
+check tp [1. 1. 1. ... 0. 0. 0.]
+npos num: 164
+ap:  0.5841404870822974
+classname: harbor
+check tp [1. 1. 1. ... 0. 0. 0.]
+npos num: 2065
+ap:  0.5495332933696702
+classname: swimming-pool
+check tp [1. 1. 1. ... 0. 0. 0.]
+npos num: 366
+ap:  0.5739786982976044
+classname: helicopter
+check tp [0. 0. 0. ... 0. 0. 0.]
+npos num: 72
+ap:  0.2946659332429835
+map: 0.646293311484435
+classaps:  [89.34241385 58.7562139  36.34604824 55.53167864 68.63702602 80.6852026
+ 81.12129458 90.71917999 61.5038049  85.66266061 60.90260269 58.41404871
+ 54.95332934 57.39786983 29.46659332]

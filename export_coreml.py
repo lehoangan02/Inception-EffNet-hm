@@ -1,7 +1,28 @@
 import argparse
+import os
+import shutil
 import torch
 
 from models import ctrbox_net
+
+
+def _safe_remove(path):
+    def _onerror(func, name, exc_info):
+        # Some file systems can surface transient AppleDouble entries (e.g. "._*")
+        # during recursive deletes; treat missing entries as already cleaned up.
+        if isinstance(exc_info[1], FileNotFoundError):
+            return
+        raise exc_info[1]
+
+    if not os.path.lexists(path):
+        return
+    if os.path.isdir(path):
+        shutil.rmtree(path, onerror=_onerror)
+    else:
+        try:
+            os.remove(path)
+        except FileNotFoundError:
+            pass
 
 
 class CoreMLExportWrapper(torch.nn.Module):
@@ -77,6 +98,8 @@ def main():
         compute_precision=ct.precision.FLOAT16,
     )
 
+    # Clean stale output path first to avoid coremltools delete races on macOS metadata files.
+    _safe_remove(args.output)
     mlmodel.save(args.output)
     print('Saved Core ML model to {}'.format(args.output))
 

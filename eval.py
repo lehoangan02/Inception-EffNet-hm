@@ -23,12 +23,14 @@ class EvalModule(object):
         print('loaded weights from {}, epoch {}'.format(resume, checkpoint['epoch']))
         state_dict_ = checkpoint['model_state_dict']
         model.load_state_dict(state_dict_, strict=False)
-        return model
+        return model, checkpoint['epoch']
 
     def evaluation(self, args, down_ratio):
         if self.backend != 'coreml':
             save_path = 'weights_'+args.dataset
-            self.model = self.load_model(self.model, os.path.join(save_path, args.resume))
+            self.model, checkpoint_epoch = self.load_model(self.model, os.path.join(save_path, args.resume))
+        else:
+            checkpoint_epoch = None
         self.model = self.model.to(self.device)
         self.model.eval()
 
@@ -50,6 +52,7 @@ class EvalModule(object):
                                  self.device,
                                  self.decoder,
                                  result_path,
+                                 epoch=checkpoint_epoch,
                                  print_ps=True)
 
         if args.dataset == 'dota':
