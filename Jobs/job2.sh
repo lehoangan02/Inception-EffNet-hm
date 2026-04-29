@@ -1,14 +1,13 @@
-```bash
 #!/bin/bash
 
 # ==============================
 # DEBUG + SAFETY
 # ==============================
 set -eo pipefail
-set -x  # remove later if too verbose
+# set -x  # Uncomment this line only if you need to debug line-by-line
 
 # ==============================
-# RESOLVE PATHS (CRITICAL FIX)
+# RESOLVE PATHS
 # ==============================
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -32,7 +31,7 @@ JOB_NAME=${SLURM_JOB_NAME:-LOCAL_RUN}
 # ==============================
 # CONFIG
 # ==============================
-DATA_DIR="/dev/shm/DATA/BridgeTrain"   # <-- adjust if needed
+DATA_DIR="/dev/shm/DATA/BridgeTrain"   # Ensure your zip files are extracted here
 ENV_DIR="$PROJECT_DIR/myenv"
 
 DEVKIT_DIR="$PROJECT_DIR/datasets/DOTA_devkit"
@@ -62,16 +61,16 @@ start_time=$(date +%s)
 if [[ -f "$ENV_DIR/bin/activate" ]]; then
   source "$ENV_DIR/bin/activate"
 else
-  echo "WARNING: venv not found at $ENV_DIR"
+  echo "WARNING: venv not found at $ENV_DIR. Script might fail if dependencies are missing."
 fi
 
 export PYTHONPATH="$PROJECT_DIR:$DEVKIT_DIR:${PYTHONPATH:-}"
 
-echo "Python: $(which python)"
-python -c "import torch; print('CUDA:', torch.cuda.is_available())"
+echo "Using Python: $(which python)"
+# (Removed the PyTorch test here to prevent OOM Killer crashes before training)
 
 # ==============================
-# VERIFY PATHS (PREVENT SILENT FAIL)
+# VERIFY PATHS
 # ==============================
 [[ -f "$PROJECT_DIR/main.py" ]] || { echo "ERROR: main.py not found"; exit 1; }
 [[ -d "$DEVKIT_DIR" ]] || { echo "ERROR: devkit missing"; exit 1; }
@@ -125,10 +124,11 @@ resubmit() {
   fi
 
   if [[ $IS_SLURM -eq 1 ]] && command -v sbatch &>/dev/null; then
-    echo "Resubmitting..."
+    echo "Resubmitting to SLURM queue..."
     sbatch "$0"
   else
-    echo "No SLURM → skipping resubmit"
+    echo "Not running in SLURM queue. Stopping session here."
+    echo "To continue training, run this script again."
   fi
 }
 
@@ -203,4 +203,3 @@ echo "========================================"
 echo "End: $(date)"
 echo "Runtime: $((end_time - start_time)) sec"
 echo "========================================"
-```
