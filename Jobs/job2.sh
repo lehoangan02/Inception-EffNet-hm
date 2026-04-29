@@ -9,6 +9,17 @@
 
 set -euo pipefail
 
+# ==========================================
+# RELATIVE PATH CONFIGURATION
+# Assuming the job is submitted from the project directory
+# ==========================================
+PROJECT_DIR="."
+# Navigate 2 levels up from project dir to reach DATA
+DATA_DIR="../../DATA/BridgeTrain" 
+# Navigate 2 levels up from project dir to reach conda_envs
+ENV_DIR="../../conda_envs/myenv"  
+# ==========================================
+
 echo "========================================"
 echo "Job ID: $SLURM_JOB_ID"
 echo "Job Name: $SLURM_JOB_NAME"
@@ -20,16 +31,16 @@ echo "========================================"
 
 start_time=$(date +%s)
 
+# Activate Conda environment using relative path
 source ~/miniconda3/etc/profile.d/conda.sh
-conda activate /media02/hvtham/conda_envs/myenv
+conda activate "$ENV_DIR"
 
-PROJECT_DIR=/media02/hvtham/BBAV/Improving-Oriented-Object-Detection-in-Aerial-Images-Using-Inception-Enhanced-EfficientNetV2-XL-with
-DEVKIT_DIR=$PROJECT_DIR/datasets/DOTA_devkit
-CKPT_DIR=$PROJECT_DIR/weights_dota
+DEVKIT_DIR="$PROJECT_DIR/datasets/DOTA_devkit"
+CKPT_DIR="$PROJECT_DIR/weights_dota"
 TARGET_EPOCH=50
 EPOCHS_PER_SESSION=2
 PHASE1_EPOCHS=10       # epochs trained with heatmap-only loss
-TRAINVAL_FILE=$CKPT_DIR/trainval.txt
+TRAINVAL_FILE="$CKPT_DIR/trainval.txt"
 
 get_latest_epoch() {
   local latest=0
@@ -96,9 +107,9 @@ handle_pre_timeout() {
 
 trap handle_pre_timeout USR1 TERM
 
-cd $PROJECT_DIR
+cd "$PROJECT_DIR"
 
-export PYTHONPATH=$PROJECT_DIR:$DEVKIT_DIR:${PYTHONPATH:-}
+export PYTHONPATH="$PROJECT_DIR:$DEVKIT_DIR:${PYTHONPATH:-}"
 
 echo "Python path: $(which python)"
 echo "PYTHONPATH: $PYTHONPATH"
@@ -107,10 +118,11 @@ python -c "import torch; print(torch.cuda.is_available())"
 
 if [ ! -f "$DEVKIT_DIR/polyiou.cpython-*.so" ]; then
     echo "Building polyiou..."
-    cd $DEVKIT_DIR
+    cd "$DEVKIT_DIR"
     swig -c++ -python polyiou.i
     python setup.py build_ext --inplace
-    cd $PROJECT_DIR
+    cd "$PROJECT_DIR"  # Need an absolute or correct relative back-path if not careful, 
+                       # but since PROJECT_DIR is ".", this will return you to the submit dir.
 fi
 
 current_epoch=$(get_latest_epoch)
@@ -132,7 +144,7 @@ fi
 
 TRAIN_CMD=(
   main.py
-  --data_dir /media02/hvtham/DATA/BridgeTrain
+  --data_dir "$DATA_DIR"
   --num_epoch "$session_end_epoch"
   --batch_size 5
   --dataset dota
