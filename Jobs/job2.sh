@@ -11,13 +11,14 @@ set -euo pipefail
 
 # ==========================================
 # RELATIVE PATH CONFIGURATION
-# Assuming the job is submitted from the project directory
+# Assuming the job is submitted from the project root:
+# /dev/shm/Improving-Oriented-Object-Detection...
 # ==========================================
 PROJECT_DIR="."
-# Navigate 2 levels up from project dir to reach DATA
-DATA_DIR="../../DATA/BridgeTrain" 
-# Navigate 2 levels up from project dir to reach conda_envs
-ENV_DIR="../../conda_envs/myenv"  
+# Navigate 1 level up from project dir to reach /dev/shm/DATA
+DATA_DIR="../DATA/BridgeTrain" 
+# Virtual environment is inside the project directory
+ENV_DIR="./myenv"  
 # ==========================================
 
 echo "========================================"
@@ -31,9 +32,8 @@ echo "========================================"
 
 start_time=$(date +%s)
 
-# Activate Conda environment using relative path
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate "$ENV_DIR"
+# Activate Python venv using relative path
+source "$ENV_DIR/bin/activate"
 
 DEVKIT_DIR="$PROJECT_DIR/datasets/DOTA_devkit"
 CKPT_DIR="$PROJECT_DIR/weights_dota"
@@ -121,8 +121,7 @@ if [ ! -f "$DEVKIT_DIR/polyiou.cpython-*.so" ]; then
     cd "$DEVKIT_DIR"
     swig -c++ -python polyiou.i
     python setup.py build_ext --inplace
-    cd "$PROJECT_DIR"  # Need an absolute or correct relative back-path if not careful, 
-                       # but since PROJECT_DIR is ".", this will return you to the submit dir.
+    cd - > /dev/null  # Return to the previous directory seamlessly
 fi
 
 current_epoch=$(get_latest_epoch)
