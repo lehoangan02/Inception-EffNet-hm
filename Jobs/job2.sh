@@ -160,7 +160,7 @@ CMD=(
   python main.py
   --data_dir "$DATA_DIR"
   --num_epoch "$session_end"
-  --batch_size 5
+  --batch_size 10
   --dataset dota
   --phase train
   --conf_thresh 0.1
