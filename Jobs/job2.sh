@@ -2,12 +2,24 @@
 #!/bin/bash
 
 # ==============================
-# SAFE SETTINGS
+# DEBUG + SAFETY
 # ==============================
-set -eo pipefail  # removed -u to avoid crashing on missing SLURM vars
+set -eo pipefail
+set -x  # remove later if too verbose
 
 # ==============================
-# DETECT ENVIRONMENT
+# RESOLVE PATHS (CRITICAL FIX)
+# ==============================
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_DIR"
+
+echo "SCRIPT_DIR: $SCRIPT_DIR"
+echo "PROJECT_DIR: $PROJECT_DIR"
+echo "CURRENT DIR: $(pwd)"
+
+# ==============================
+# ENV DETECTION
 # ==============================
 IS_SLURM=0
 if [[ -n "${SLURM_JOB_ID:-}" ]]; then
@@ -16,20 +28,20 @@ fi
 
 JOB_ID=${SLURM_JOB_ID:-LOCAL}
 JOB_NAME=${SLURM_JOB_NAME:-LOCAL_RUN}
-SUBMIT_DIR=${SLURM_SUBMIT_DIR:-$(pwd)}
 
 # ==============================
-# PATH CONFIG
+# CONFIG
 # ==============================
-PROJECT_DIR="."
-DATA_DIR="../DATA/BridgeTrain"
-ENV_DIR="./myenv"
+DATA_DIR="/dev/shm/DATA/BridgeTrain"   # <-- adjust if needed
+ENV_DIR="$PROJECT_DIR/myenv"
 
 DEVKIT_DIR="$PROJECT_DIR/datasets/DOTA_devkit"
 CKPT_DIR="$PROJECT_DIR/weights_dota"
+
 TARGET_EPOCH=50
 EPOCHS_PER_SESSION=2
 PHASE1_EPOCHS=10
+
 TRAINVAL_FILE="$CKPT_DIR/trainval.txt"
 
 # ==============================
@@ -38,26 +50,42 @@ TRAINVAL_FILE="$CKPT_DIR/trainval.txt"
 echo "========================================"
 echo "Job ID: $JOB_ID"
 echo "Job Name: $JOB_NAME"
-echo "Running on: $(hostname)"
-echo "Working dir: $(pwd)"
-echo "Start time: $(date)"
-
-if [[ $IS_SLURM -eq 1 ]]; then
-  echo "Submit time: $(scontrol show job $SLURM_JOB_ID | grep SubmitTime | awk -F= '{print $2}')"
-else
-  echo "Submit time: N/A (local run)"
-fi
+echo "Host: $(hostname)"
+echo "Start: $(date)"
 echo "========================================"
 
 start_time=$(date +%s)
 
 # ==============================
-# ACTIVATE ENV
+# ENV SETUP
 # ==============================
 if [[ -f "$ENV_DIR/bin/activate" ]]; then
   source "$ENV_DIR/bin/activate"
 else
-  echo "WARNING: Virtualenv not found at $ENV_DIR"
+  echo "WARNING: venv not found at $ENV_DIR"
+fi
+
+export PYTHONPATH="$PROJECT_DIR:$DEVKIT_DIR:${PYTHONPATH:-}"
+
+echo "Python: $(which python)"
+python -c "import torch; print('CUDA:', torch.cuda.is_available())"
+
+# ==============================
+# VERIFY PATHS (PREVENT SILENT FAIL)
+# ==============================
+[[ -f "$PROJECT_DIR/main.py" ]] || { echo "ERROR: main.py not found"; exit 1; }
+[[ -d "$DEVKIT_DIR" ]] || { echo "ERROR: devkit missing"; exit 1; }
+[[ -d "$CKPT_DIR" ]] || mkdir -p "$CKPT_DIR"
+
+# ==============================
+# BUILD EXTENSION
+# ==============================
+if ! ls "$DEVKIT_DIR"/polyiou*.so &>/dev/null; then
+  echo "Building polyiou..."
+  cd "$DEVKIT_DIR"
+  swig -c++ -python polyiou.i
+  python setup.py build_ext --inplace
+  cd "$PROJECT_DIR"
 fi
 
 # ==============================
@@ -77,85 +105,46 @@ get_latest_epoch() {
   echo "$latest"
 }
 
-archive_trainval_if_present() {
-  local start_epoch="$1"
-  local end_epoch="$2"
+archive_trainval() {
+  local start="$1"
+  local end="$2"
 
   [[ ! -f "$TRAINVAL_FILE" ]] && return
 
-  local dst="$CKPT_DIR/trainval_${start_epoch}to${end_epoch}.txt"
-  local suffix=1
-
-  while [[ -e "$dst" ]]; do
-    dst="$CKPT_DIR/trainval_${start_epoch}to${end_epoch}_$suffix.txt"
-    ((suffix++))
-  done
-
+  local dst="$CKPT_DIR/trainval_${start}to${end}.txt"
   mv "$TRAINVAL_FILE" "$dst"
   echo "Archived: $dst"
 }
 
-resubmit_if_needed() {
-  local latest_epoch="$1"
+resubmit() {
+  local epoch="$1"
 
-  if (( latest_epoch >= TARGET_EPOCH )); then
-    echo "Target reached ($latest_epoch). No resubmit."
+  if (( epoch >= TARGET_EPOCH )); then
+    echo "Target reached."
     return
   fi
 
-  if [[ $IS_SLURM -eq 1 ]] && command -v sbatch &> /dev/null; then
-    echo "Resubmitting via SLURM..."
+  if [[ $IS_SLURM -eq 1 ]] && command -v sbatch &>/dev/null; then
+    echo "Resubmitting..."
     sbatch "$0"
   else
-    echo "Skipping resubmit (no SLURM)"
+    echo "No SLURM → skipping resubmit"
   fi
 }
 
-handle_pre_timeout() {
-  echo "Received timeout signal"
-  latest_epoch=$(get_latest_epoch)
-  resubmit_if_needed "$latest_epoch"
-  exit 0
-}
-
-trap handle_pre_timeout USR1 TERM
-
 # ==============================
-# SETUP
-# ==============================
-cd "$PROJECT_DIR"
-
-export PYTHONPATH="$PROJECT_DIR:$DEVKIT_DIR:${PYTHONPATH:-}"
-
-echo "Python: $(which python)"
-echo "CUDA check:"
-python -c "import torch; print(torch.cuda.is_available())"
-
-# ==============================
-# BUILD EXTENSION (if needed)
-# ==============================
-if ! ls "$DEVKIT_DIR"/polyiou*.so &>/dev/null; then
-  echo "Building polyiou..."
-  cd "$DEVKIT_DIR"
-  swig -c++ -python polyiou.i
-  python setup.py build_ext --inplace
-  cd - > /dev/null
-fi
-
-# ==============================
-# TRAINING LOGIC
+# TRAIN LOGIC
 # ==============================
 current_epoch=$(get_latest_epoch)
 echo "Current epoch: $current_epoch"
 
 if (( current_epoch >= TARGET_EPOCH )); then
-  echo "Already reached target. Exiting."
+  echo "Training already complete."
   exit 0
 fi
 
 session_end=$(( current_epoch + EPOCHS_PER_SESSION ))
 
-# Prevent crossing phase boundary
 if (( current_epoch < PHASE1_EPOCHS && session_end > PHASE1_EPOCHS )); then
   session_end=$PHASE1_EPOCHS
 fi
@@ -165,7 +154,7 @@ fi
 echo "Training to epoch: $session_end"
 
 # ==============================
-# BUILD TRAIN COMMAND
+# BUILD COMMAND
 # ==============================
 CMD=(
   python main.py
@@ -178,43 +167,40 @@ CMD=(
 )
 
 if (( current_epoch == 0 )); then
-  echo "Phase 1 start"
   CMD+=(--pretrained --heatmap_only)
 
 elif (( current_epoch < PHASE1_EPOCHS )); then
-  echo "Phase 1 resume"
   CMD+=(--resume_train "$CKPT_DIR/model_${current_epoch}.pth" --heatmap_only)
 
 elif (( current_epoch == PHASE1_EPOCHS )); then
-  echo "Phase 2 start"
   CMD+=(--resume_train "$CKPT_DIR/model_${current_epoch}.pth" --reset_lr)
 
 else
-  echo "Phase 2 resume"
   CMD+=(--resume_train "$CKPT_DIR/model_${current_epoch}.pth")
 fi
 
 # ==============================
-# RUN TRAINING
+# RUN
 # ==============================
+echo "Running training..."
 "${CMD[@]}"
 
-latest_epoch=$(get_latest_epoch)
-echo "New epoch: $latest_epoch"
+# ==============================
+# POST
+# ==============================
+new_epoch=$(get_latest_epoch)
+echo "New epoch: $new_epoch"
 
-if (( latest_epoch > current_epoch )); then
-  archive_trainval_if_present "$((current_epoch+1))" "$latest_epoch"
+if (( new_epoch > current_epoch )); then
+  archive_trainval "$((current_epoch+1))" "$new_epoch"
 fi
 
-resubmit_if_needed "$latest_epoch"
+resubmit "$new_epoch"
 
-# ==============================
-# END
-# ==============================
 end_time=$(date +%s)
 
 echo "========================================"
-echo "End time: $(date)"
+echo "End: $(date)"
 echo "Runtime: $((end_time - start_time)) sec"
 echo "========================================"
 ```
