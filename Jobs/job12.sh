@@ -14,7 +14,8 @@ start_time=$(date +%s)
 
 PROJECT_DIR=/workspace/Improving-Oriented-Object-Detection-in-Aerial-Images-Using-Inception-Enhanced-EfficientNetV2-XL-with
 DEVKIT_DIR=$PROJECT_DIR/datasets/DOTA_devkit
-CKPT_DIR=$PROJECT_DIR/weights_dota
+CKPT_ROOT=${BBAV_SAVE_DIR:-/dev/shm}
+CKPT_DIR=$CKPT_ROOT/weights_dota
 TARGET_EPOCH=50
 EPOCHS_PER_SESSION=2
 PHASE1_EPOCHS=10       # epochs trained with heatmap-only loss
@@ -69,9 +70,15 @@ trap handle_interrupt INT TERM
 cd $PROJECT_DIR
 
 export PYTHONPATH=$PROJECT_DIR:$DEVKIT_DIR:${PYTHONPATH:-}
+mkdir -p "$CKPT_DIR"
+if [[ ! -e "$PROJECT_DIR/weights_dota" ]]; then
+  ln -s "$CKPT_DIR" "$PROJECT_DIR/weights_dota"
+  echo "Linked $PROJECT_DIR/weights_dota -> $CKPT_DIR"
+fi
 
 echo "Python path: $(which python)"
 echo "PYTHONPATH: $PYTHONPATH"
+echo "Checkpoint dir: $CKPT_DIR"
 echo "CUDA available check:"
 python -c "import torch; print(torch.cuda.is_available())"
 
@@ -115,6 +122,7 @@ while true; do
     --dataset dota
     --phase train
     --conf_thresh 0.1
+    --save_dir "$CKPT_ROOT"
   )
 
   if (( current_epoch == 0 )); then

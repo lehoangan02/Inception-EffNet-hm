@@ -35,7 +35,8 @@ DATA_DIR="/dev/shm/DATA/BridgeTrain"   # Ensure your zip files are extracted her
 ENV_DIR="$PROJECT_DIR/myenv"
 
 DEVKIT_DIR="$PROJECT_DIR/datasets/DOTA_devkit"
-CKPT_DIR="$PROJECT_DIR/weights_dota"
+CKPT_ROOT="${BBAV_SAVE_DIR:-/dev/shm}"
+CKPT_DIR="$CKPT_ROOT/weights_dota"
 
 TARGET_EPOCH=50
 EPOCHS_PER_SESSION=2
@@ -65,8 +66,14 @@ else
 fi
 
 export PYTHONPATH="$PROJECT_DIR:$DEVKIT_DIR:${PYTHONPATH:-}"
+mkdir -p "$CKPT_DIR"
+if [[ ! -e "$PROJECT_DIR/weights_dota" ]]; then
+  ln -s "$CKPT_DIR" "$PROJECT_DIR/weights_dota"
+  echo "Linked $PROJECT_DIR/weights_dota -> $CKPT_DIR"
+fi
 
 echo "Using Python: $(which python)"
+echo "Checkpoint dir: $CKPT_DIR"
 # (Removed the PyTorch test here to prevent OOM Killer crashes before training)
 
 # ==============================
@@ -164,6 +171,7 @@ CMD=(
   --dataset dota
   --phase train
   --conf_thresh 0.1
+  --save_dir "$CKPT_ROOT"
 )
 
 if (( current_epoch == 0 )); then
