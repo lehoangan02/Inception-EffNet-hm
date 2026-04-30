@@ -1,6 +1,7 @@
 import os
 import torch
 import numpy as np
+from tqdm import tqdm
 from datasets.DOTA_devkit.ResultMerge_multi_process import py_cpu_nms_poly_fast, py_cpu_nms_poly
 
 
@@ -53,9 +54,14 @@ def write_results(args,
                   device,
                   decoder,
                   result_path,
+                  epoch=None,
                   print_ps=False):
     results = {cat: {img_id: [] for img_id in dsets.img_ids} for cat in dsets.category}
-    for index in range(len(dsets)):
+    desc = 'testing'
+    if epoch is not None:
+        desc = 'epoch {} testing'.format(epoch)
+    progress = tqdm(range(len(dsets)), desc=desc, unit='img')
+    for index in progress:
         data_dict = dsets.__getitem__(index)
         image = data_dict['image'].to(device)
         img_id = data_dict['img_id']
@@ -69,9 +75,9 @@ def write_results(args,
         decoded_pts = []
         decoded_scores = []
         # lehoangan changed here
-        if torch.cuda.is_available():
+        if device.type == 'cuda':
             torch.cuda.synchronize(device)
-        elif torch.backends.mps.is_available():
+        elif device.type == 'mps' and hasattr(torch, 'mps') and hasattr(torch.mps, 'synchronize'):
             torch.mps.synchronize()
         predictions = decoder.ctdet_decode(pr_decs)
         pts0, scores0 = decode_prediction(predictions, dsets, args, img_id, down_ratio)
@@ -93,8 +99,7 @@ def write_results(args,
                 nms_results = non_maximum_suppression(pts_cat, scores_cat)
                 results[cat][img_id].extend(nms_results)
         if print_ps:
-            # pass
-            print('testing {}/{} data {}'.format(index+1, len(dsets), img_id))
+            progress.set_postfix_str(str(img_id))
 
     for cat in dsets.category:
         if cat == 'background':
