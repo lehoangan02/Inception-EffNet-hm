@@ -18,8 +18,6 @@ MAP_OUTPUT_DIR="${MAP_OUTPUT_DIR:-$OUTPUT_DIR/$MAP_DIR_NAME}"
 DATA_DIR="${DATA_DIR:-/Volumes/ExternalSSD/data/Validate_DOTA_1_0.5}"
 LABEL_DIR="${LABEL_DIR:-/Volumes/ExternalSSD/data/labelTxt}"
 IMAGESET_FILE="${IMAGESET_FILE:-/Volumes/ExternalSSD/data/val_orig.txt}"
-COREML_MODEL=${COREML_MODEL:-}
-COREML_COMPUTE_UNITS=${COREML_COMPUTE_UNITS:-cpu_and_ne}
 MERGE_DIR="${MERGE_DIR:-$PROJECT_DIR/merge_dota}"
 
 mkdir -p "$OUTPUT_DIR"
@@ -47,29 +45,6 @@ if [[ ! -f "$WEIGHTS" ]]; then
   continue
 fi
 
-if [[ "$(uname -s)" == "Darwin" ]]; then
-  CURRENT_COREML_MODEL="$WEIGHTS_DIR/model_$i.mlpackage"
-  if [[ ! -f "$CURRENT_COREML_MODEL" ]]; then
-    echo "Core ML model not found at $CURRENT_COREML_MODEL"
-    echo "Exporting Core ML model from $WEIGHTS..."
-    python export_coreml.py --checkpoint "$WEIGHTS" --output "$CURRENT_COREML_MODEL"
-  fi
-
-  if [[ -n "$COREML_MODEL" ]]; then
-    CURRENT_COREML_MODEL="$COREML_MODEL"
-    if [[ ! -f "$CURRENT_COREML_MODEL" ]]; then
-      echo "COREML_MODEL override not found at $CURRENT_COREML_MODEL"
-      exit 1
-    fi
-  fi
-
-  BACKEND_ARGS=(--backend coreml --coreml_model "$CURRENT_COREML_MODEL" --coreml_compute_units "$COREML_COMPUTE_UNITS")
-  echo "Using Core ML backend with model: $CURRENT_COREML_MODEL"
-else
-  BACKEND_ARGS=(--backend pytorch)
-  echo "Using PyTorch backend"
-fi
-
 echo "========================================"
 echo "Evaluating model_$i.pth"
 echo "========================================"
@@ -80,8 +55,7 @@ python main.py \
   --dataset dota \
   --phase eval \
   --conf_thresh 0.1 \
-  --resume "$WEIGHTS" \
-  "${BACKEND_ARGS[@]}"
+  --resume "$WEIGHTS"
 
 if [[ -f "$MERGE_DIR/Task1_bridge.txt" ]]; then
   echo "Running bridge postprocess for model_$i..."

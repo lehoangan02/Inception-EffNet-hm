@@ -185,9 +185,6 @@ class TrainModule(object):
                             self.optimizer)
 
     def calculate_checkpoint_losses(self, args):
-        if args.backend == 'coreml':
-            raise ValueError('Core ML backend is inference-only and cannot be used for loss calculation.')
-
         save_path = weights_dir(args)
         if not os.path.exists(save_path):
             os.makedirs(save_path)

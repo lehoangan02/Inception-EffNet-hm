@@ -22,11 +22,7 @@ class TestModule(object):
     def __init__(self, dataset, num_classes, model, decoder):
         torch.manual_seed(317)
         print(torch.cuda.is_available())
-        self.backend = 'coreml' if model.__class__.__name__ == 'CoreMLModelRunner' else 'pytorch'
-        if self.backend == 'coreml':
-            self.device = torch.device('cpu')
-        else:
-            self.device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu"))
+        self.device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu"))
         print(self.device)
         self.dataset = dataset
         self.num_classes = num_classes
@@ -84,8 +80,7 @@ class TestModule(object):
 
 
     def test(self, args, down_ratio):
-        if self.backend != 'coreml':
-            self.model = self.load_model(self.model, resolve_checkpoint_path(args, args.resume))
+        self.model = self.load_model(self.model, resolve_checkpoint_path(args, args.resume))
         self.model = self.model.to(self.device)
         self.model.eval()
 

@@ -2,7 +2,6 @@ import argparse
 import train
 import test
 import eval
-from coreml_backend import CoreMLModelRunner
 from checkpoint_paths import default_save_dir
 from datasets.dataset_dota import DOTA
 from datasets.dataset_hrsc import HRSC
@@ -12,7 +11,7 @@ import decoder
 
 def parse_args():
     parser = argparse.ArgumentParser(description='BBAVectors Implementation')
-    parser.add_argument('--num_epoch', type=int, default=1, help='Number of epochs')
+    parser.add_argument('--num_epoch', '--epochs', dest='num_epoch', type=int, default=1, help='Number of epochs')
     parser.add_argument('--batch_size', type=int, default=16, help='Number of batch size')
     parser.add_argument('--num_workers', type=int, default=4, help='Number of workers')
     parser.add_argument('--init_lr', type=float, default=1.25e-4, help='Initial learning rate')
@@ -41,23 +40,6 @@ def parse_args():
                         help='Use heatmap (focal) loss only, skip wh/offset/theta losses')
     parser.add_argument('--reset_lr', action='store_true',
                         help='Reset LR to init_lr after resuming checkpoint (as if starting fresh)')
-    parser.add_argument('--backend', type=str, default='pytorch', choices=['pytorch', 'coreml'],
-                        help='Inference backend. Use coreml for Apple Core ML runtime (eval/test only).')
-    parser.add_argument('--coreml_model', type=str, default='',
-                        help='Path to .mlmodel or .mlpackage for Core ML inference backend')
-    parser.add_argument('--coreml_input_name', type=str, default='input',
-                        help='Core ML model input feature name for image tensor')
-    parser.add_argument('--coreml_hm_name', type=str, default='hm',
-                        help='Core ML output feature name for heatmap tensor')
-    parser.add_argument('--coreml_wh_name', type=str, default='wh',
-                        help='Core ML output feature name for wh tensor')
-    parser.add_argument('--coreml_reg_name', type=str, default='reg',
-                        help='Core ML output feature name for regression tensor')
-    parser.add_argument('--coreml_cls_theta_name', type=str, default='cls_theta',
-                        help='Core ML output feature name for cls_theta tensor')
-    parser.add_argument('--coreml_compute_units', type=str, default='all',
-                        choices=['all', 'cpu_only', 'cpu_and_gpu', 'cpu_and_ne'],
-                        help='Core ML compute unit preference')
     args = parser.parse_args()
     return args
 
@@ -80,21 +62,6 @@ if __name__ == '__main__':
     decoder = decoder.DecDecoder(K=args.K,
                                  conf_thresh=args.conf_thresh,
                                  num_classes=num_classes[args.dataset])
-
-    if args.backend == 'coreml':
-        if args.phase == 'train':
-            raise ValueError('Core ML backend is inference-only. Use --backend pytorch for training.')
-        if not args.coreml_model:
-            raise ValueError('When --backend coreml is set, --coreml_model must be provided.')
-        model = CoreMLModelRunner(
-            model_path=args.coreml_model,
-            input_name=args.coreml_input_name,
-            hm_name=args.coreml_hm_name,
-            wh_name=args.coreml_wh_name,
-            reg_name=args.coreml_reg_name,
-            cls_theta_name=args.coreml_cls_theta_name,
-            compute_units=args.coreml_compute_units,
-        )
 
     if args.phase == 'train':
         ctrbox_obj = train.TrainModule(dataset=dataset,
