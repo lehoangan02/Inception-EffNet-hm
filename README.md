@@ -59,7 +59,7 @@ Examples:
 341.0 376.0 487.0 487.0 434.0 556.0 287.0 444.0 tennis-court 0
 428.0 6.0 519.0 66.0 492.0 108.0 405.0 50.0 bridge 0
 ```
-## Data Arrangment
+## Data Arrangement
 ### DOTA
 ```
 data_dir/
@@ -69,16 +69,18 @@ data_dir/
         test.txt
 ```
 you may modify `datasets/dataset_dota.py` to adapt code to your own data.
-## Train Model
-```ruby
-python main.py --data_dir dataPath --epochs 80 --batch_size 16 --dataset dota --phase train
-```
 
 ## Quick GPU Sanity Check (Small Batch)
 Create a tiny dataset subset (e.g. 5-20 images/labels) and update `trainval.txt`/`test.txt` to point to it. Then run:
 ```ruby
-python main.py --data_dir dataPath --epochs 1 --batch_size 2 --num_workers 0 --dataset dota --phase train --save_dir ./runs --pretrained
-python main.py --data_dir dataPath --batch_size 1 --dataset dota --phase test --save_dir ./runs --resume model_1.pth
+python main.py --data_dir dataPath --epochs 1 --batch_size 1 --dataset dota --phase train --save_dir ./runs --pretrained
+python main.py --data_dir dataPath --batch_size 1 --dataset dota --phase test --resume model_1.pth
+python main.py --data_dir dataPath --conf_thresh 0.1 --batch_size 1 --dataset dota --phase eval --resume model_1.pth
+```
+
+## Train Model
+```ruby
+python main.py --data_dir dataPath --epochs 50 --batch_size 16 --dataset dota --phase train
 ```
 
 ## Test Model
@@ -86,11 +88,10 @@ python main.py --data_dir dataPath --batch_size 1 --dataset dota --phase test --
 python main.py --data_dir dataPath --batch_size 16 --dataset dota --phase test
 ```
 
-
-<!-- ## Evaluate Model
+## Evaluate Model
 ```ruby
 python main.py --data_dir dataPath --conf_thresh 0.1 --batch_size 16 --dataset dota --phase eval
-``` -->
+```
 
 You may change `conf_thresh` to get a better `mAP`. 
 
