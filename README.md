@@ -26,7 +26,7 @@ Ubuntu 18.04, Python 3.6.10, PyTorch 1.6.0, OpenCV-Python 4.3.0.36
 
 # How To Start
 
-Download and install the DOTA development kit [DOTA_devkit](https://github.com/lehoangan02/DOTA_devkit) and put it under datasets folder.
+Download and follow the installation instructions for the DOTA development kit [DOTA_devkit](https://github.com/lehoangan02/DOTA_devkit) and put it under datasets folder.
 
 ## GPU Notes
 - Use a CUDA-enabled PyTorch build so `torch.cuda.is_available()` returns true.
@@ -40,6 +40,8 @@ Download and install the DOTA development kit [DOTA_devkit](https://github.com/l
 Split the DOTA images from [DOTA_devkit](https://github.com/lehoangan02/DOTA_devkit) before training, testing and evaluation.
 
 The dota ```trainval``` and ```test``` datasets are cropped into ```608x608``` patches with a stride of `100` and two scales `0.5` and `1`.
+
+The splitted DOTA validation dataset can be found [here](https://huggingface.co/datasets/lehoangan02/BridgeTrain/resolve/main/Cross%20Validation/Validate_DOTA_1_0.5.zip?download=true)
 
 ### About Split TXT Files
 The `trainval.txt` and `test.txt` used in `datasets/dataset_dota.py` contain the list of image names without suffix, example:
@@ -60,7 +62,9 @@ Examples:
 341.0 376.0 487.0 487.0 434.0 556.0 287.0 444.0 tennis-court 0
 428.0 6.0 519.0 66.0 492.0 108.0 405.0 50.0 bridge 0
 ```
+
 ## Data Arrangement
+
 ### DOTA
 ```
 data_dir/
