@@ -117,38 +117,27 @@ def isnan(x):
 
   
 class LossAll(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, heatmap_only=False):
         super(LossAll, self).__init__()
+        self.heatmap_only = heatmap_only
         self.L_hm = FocalLoss()
         self.L_wh =  OffSmoothL1Loss()
         self.L_off = OffSmoothL1Loss()
         self.L_cls_theta = BCELoss()
-        # self.L_corners = OffSmoothL1Loss()
 
     def forward(self, pr_decs, gt_batch):
-        hm_loss  = self.L_hm(pr_decs['hm'], gt_batch['hm'])
+        hm_loss = self.L_hm(pr_decs['hm'], gt_batch['hm'])
+        if self.heatmap_only:
+            return hm_loss
+
         wh_loss  = self.L_wh(pr_decs['wh'], gt_batch['reg_mask'], gt_batch['ind'], gt_batch['wh'])
         off_loss = self.L_off(pr_decs['reg'], gt_batch['reg_mask'], gt_batch['ind'], gt_batch['reg'])
-        # if 'corners' in pr_decs:
-        #     corners_loss = self.L_corners(pr_decs['corners'], gt_batch['reg_mask'], gt_batch['ind'], gt_batch['corners'])
-        # else:
-        #     corners_loss = 0
-        ## add
         cls_theta_loss = self.L_cls_theta(pr_decs['cls_theta'], gt_batch['reg_mask'], gt_batch['ind'], gt_batch['cls_theta'])
 
         if isnan(hm_loss) or isnan(wh_loss) or isnan(off_loss):
             print('hm loss is {}'.format(hm_loss))
             print('wh loss is {}'.format(wh_loss))
             print('off loss is {}'.format(off_loss))
-            # print('corners loss is {}'.format(corners_loss))
 
-        # print(f"hm_loss: {hm_loss.item()}")
-        # print(f"wh_loss: {wh_loss.item()}")
-        # print(f"off_loss: {off_loss.item()}")
-        # print(f"cls_theta_loss: {cls_theta_loss.item()}")
-        # if 'corners' in pr_decs:
-        #     print(f"corners_loss: {corners_loss.item()}")
-        # print('-----------------')
-
-        loss =  hm_loss + wh_loss + off_loss + cls_theta_loss #+ corners_loss
+        loss = hm_loss + wh_loss + off_loss + cls_theta_loss
         return loss

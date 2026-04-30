@@ -324,7 +324,7 @@ class CTRBOX_EfficientNetV2(nn.Module):
         self.base_network = efficientnet_v2.EfficientNetV2('xl',
                         in_channels=3,
                         n_classes=256,
-                        pretrained=True)
+                        pretrained=pretrained)
         self.adapter_layer = nn.Sequential(nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1, bias=False),
                         nn.BatchNorm2d(128),
                         nn.ReLU(inplace=True),

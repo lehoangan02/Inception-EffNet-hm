@@ -5,6 +5,7 @@ import numpy as np
 import loss
 import cv2
 import func_utils
+from checkpoint_paths import resolve_checkpoint_path, weights_dir
 from datasets.dataset_dota import DOTA
 from tqdm import tqdm
 from contextlib import nullcontext
@@ -64,12 +65,24 @@ class TrainModule(object):
             state_dict = model.module.state_dict()
         else:
             state_dict = model.state_dict()
-        torch.save({
+        checkpoint = {
             'epoch': epoch,
             'model_state_dict': state_dict,
             'optimizer_state_dict': optimizer.state_dict(),
             # 'loss': loss
-        }, path)
+        }
+        parent_dir = os.path.dirname(path)
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+        tmp_path = path + '.tmp'
+        try:
+            torch.save(checkpoint, tmp_path)
+            os.replace(tmp_path, path)
+        except Exception:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+            raise
+        print('Saved checkpoint to {}'.format(path))
 
     def load_model(self, model, optimizer, resume, strict=True):
         checkpoint = torch.load(resume, map_location=lambda storage, loc: storage)
@@ -96,33 +109,45 @@ class TrainModule(object):
                     print('No param {}.'.format(k))
                     state_dict[k] = model_state_dict[k]
         model.load_state_dict(state_dict, strict=False)
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        for state in optimizer.state.values():
-            for k, v in state.items():
-                if isinstance(v, torch.Tensor):
-                    state[k] = v.cuda()
+        if optimizer is not None:
+            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            for state in optimizer.state.values():
+                for k, v in state.items():
+                    if isinstance(v, torch.Tensor):
+                        state[k] = v.cuda()
         epoch = checkpoint['epoch']
         # loss = checkpoint['loss']
         return model, optimizer, epoch
+
+    def load_checkpoint_for_loss(self, model, resume, strict=True):
+        return self.load_model(model, None, resume, strict=strict)
 
     def train_network(self, args):
 
         self.optimizer = torch.optim.Adam(self.model.parameters(), args.init_lr)
         self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.96, last_epoch=-1)
-        save_path = 'weights_'+args.dataset
+        save_path = weights_dir(args)
         start_epoch = 1
         
         # add resume part for continuing training when break previously, 10-16-2020
         if args.resume_train:
-            self.model, self.optimizer, start_epoch = self.load_model(self.model, 
-                                                                        self.optimizer, 
-                                                                        args.resume_train, 
+            resume_train = resolve_checkpoint_path(args, args.resume_train)
+            self.model, self.optimizer, start_epoch = self.load_model(self.model,
+                                                                        self.optimizer,
+                                                                        resume_train,
                                                                         strict=True)
             start_epoch += 1
-        # end 
+            if getattr(args, 'reset_lr', False):
+                for pg in self.optimizer.param_groups:
+                    pg['lr'] = args.init_lr
+                self.scheduler = torch.optim.lr_scheduler.ExponentialLR(
+                    self.optimizer, gamma=0.96, last_epoch=-1)
+                print('LR reset to {} (fresh schedule)'.format(args.init_lr))
+        # end
 
         if not os.path.exists(save_path):
-            os.mkdir(save_path)
+            os.makedirs(save_path)
+        print('Saving training outputs to {}'.format(save_path))
         if args.ngpus>1:
             if torch.cuda.device_count() > 1:
                 print("Let's use", torch.cuda.device_count(), "GPUs!")
@@ -130,7 +155,7 @@ class TrainModule(object):
                 self.model = nn.DataParallel(self.model)
         self.model.to(self.device)
 
-        criterion = loss.LossAll()
+        criterion = loss.LossAll(heatmap_only=getattr(args, 'heatmap_only', False))
         print('Setting up data...')
 
         dataset_module = self.dataset[args.dataset]
@@ -165,12 +190,6 @@ class TrainModule(object):
             self.scheduler.step()
             np.savetxt(os.path.join(save_path, 'train_loss.txt'), train_loss, fmt='%.6f')
 
-            if epoch % 5 == 0 or epoch > 1:
-                self.save_model(os.path.join(save_path, 'model_{}.pth'.format(epoch)),
-                                epoch,
-                                self.model,
-                                self.optimizer)
-
             if 'test' in self.dataset_phase[args.dataset] and epoch%5==0:
                 mAP = self.dec_eval(args, dsets['test'])
                 ap_list.append(mAP)
@@ -180,6 +199,50 @@ class TrainModule(object):
                             epoch,
                             self.model,
                             self.optimizer)
+
+    def calculate_checkpoint_losses(self, args):
+        save_path = weights_dir(args)
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+
+        self.model.to(self.device)
+        criterion = loss.LossAll(heatmap_only=getattr(args, 'heatmap_only', False))
+        print('Setting up data...')
+
+        dsets = {x: DOTA(data_dir=args.data_dir,
+                         phase=x,
+                         input_h=args.input_h,
+                         input_w=args.input_w,
+                         down_ratio=self.down_ratio)
+                 for x in self.dataset_phase[args.dataset]}
+        data_loader = torch.utils.data.DataLoader(dsets['train'],
+                                                  batch_size=args.batch_size,
+                                                  shuffle=False,
+                                                  num_workers=args.num_workers,
+                                                  pin_memory=True,
+                                                  drop_last=False,
+                                                  collate_fn=collater)
+
+        records = []
+        for epoch in args.loss_epochs:
+            checkpoint_path = os.path.join(save_path, 'model_{}.pth'.format(epoch))
+            if not os.path.exists(checkpoint_path):
+                print('Skipping missing checkpoint {}'.format(checkpoint_path))
+                continue
+
+            self.load_checkpoint_for_loss(self.model, checkpoint_path, strict=True)
+            self.model.to(self.device)
+            print('Calculating loss for checkpoint epoch {}'.format(epoch))
+            epoch_loss = self.run_epoch(phase='eval',
+                                        data_loader=data_loader,
+                                        criterion=criterion)
+            records.append((epoch, epoch_loss))
+
+        if records:
+            loss_path = os.path.join(save_path, 'checkpoint_losses.txt')
+            np.savetxt(loss_path, np.array(records), fmt=['%d', '%.6f'])
+            print('Saved checkpoint losses to {}'.format(loss_path))
+        return records
 
     def run_epoch(self, phase, data_loader, criterion):
         if phase == 'train':

@@ -48,7 +48,8 @@ python main.py \
   --batch_size 16 \
   --dataset dota \
   --phase eval \
-  --conf_thresh 0.1
+  --conf_thresh 0.1 \
+  --save_dir "$PROJECT_DIR"
 
 end_time=$(date +%s)
 

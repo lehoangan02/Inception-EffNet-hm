@@ -1,12 +1,13 @@
 import torch
 import os
 import func_utils
+from checkpoint_paths import resolve_checkpoint_path
 
 
 class EvalModule(object):
     def __init__(self, dataset, num_classes, model, decoder):
         torch.manual_seed(317)
-        self.device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu"))        
+        self.device = torch.device("mps" if torch.backends.mps.is_available() else ("cuda:0" if torch.cuda.is_available() else "cpu"))
         print(self.device)
         self.dataset = dataset
         self.num_classes = num_classes
@@ -19,11 +20,10 @@ class EvalModule(object):
         print('loaded weights from {}, epoch {}'.format(resume, checkpoint['epoch']))
         state_dict_ = checkpoint['model_state_dict']
         model.load_state_dict(state_dict_, strict=False)
-        return model
+        return model, checkpoint['epoch']
 
     def evaluation(self, args, down_ratio):
-        save_path = 'weights_'+args.dataset
-        self.model = self.load_model(self.model, os.path.join(save_path, args.resume))
+        self.model, checkpoint_epoch = self.load_model(self.model, resolve_checkpoint_path(args, args.resume))
         self.model = self.model.to(self.device)
         self.model.eval()
 
@@ -45,6 +45,7 @@ class EvalModule(object):
                                  self.device,
                                  self.decoder,
                                  result_path,
+                                 epoch=checkpoint_epoch,
                                  print_ps=True)
 
         if args.dataset == 'dota':

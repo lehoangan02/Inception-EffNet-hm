@@ -1,25 +1,20 @@
 #!/bin/bash
-#SBATCH --job-name=eval_all
-#SBATCH --output=eval_al_ef1.log
-#SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=2
-#SBATCH --mem=40G
-#SBATCH --time=48:00:00
+# Evaluation script for a single rented machine (no SLURM).
+# Run inside tmux: tmux new-session -s eval 'bash Jobs/job13.sh'
 
 set -euo pipefail
 
 echo "========================================"
-echo "Job ID: $SLURM_JOB_ID"
-echo "Node: $(hostname)"
+echo "PID: $$"
+echo "Host: $(hostname)"
 echo "Start: $(date)"
 echo "========================================"
 
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate /media02/hvtham/conda_envs/myenv
+start_time=$(date +%s)
 
-PROJECT_DIR=/media02/hvtham/BBAV/Improving-Oriented-Object-Detection-in-Aerial-Images-Using-Inception-Enhanced-EfficientNetV2-XL-with
+PROJECT_DIR=/workspace/Improving-Oriented-Object-Detection-in-Aerial-Images-Using-Inception-Enhanced-EfficientNetV2-XL-with
 DEVKIT_DIR=$PROJECT_DIR/datasets/DOTA_devkit
-WEIGHTS_DIR=$PROJECT_DIR/weights_dota
+WEIGHTS_DIR=$PROJECT_DIR/DATA/weights_dota/weights_dota
 OUTPUT_DIR=$PROJECT_DIR/eval_results
 
 mkdir -p "$OUTPUT_DIR"
@@ -28,9 +23,11 @@ cd "$PROJECT_DIR"
 
 export PYTHONPATH=$PROJECT_DIR:$DEVKIT_DIR:${PYTHONPATH:-}
 
-python -c "import torch; print('CUDA available:', torch.cuda.is_available())"
+echo "Python path: $(which python)"
+echo "PYTHONPATH: $PYTHONPATH"
+python -c "import torch; print('CUDA:', torch.cuda.is_available())"
 
-for i in $(seq 21 50); do
+for i in $(seq 11 20); do
   echo "========================================"
   echo "Evaluating model_${i}.pth"
   echo "========================================"
@@ -42,8 +39,8 @@ for i in $(seq 21 50); do
   fi
 
   python main.py \
-    --data_dir /media02/hvtham/DATA/Validate_DOTA_1_0.5 \
-    --batch_size 16 \
+    --data_dir "/workspace/DATA/Validate_DOTA_1_0.5" \
+    --batch_size 15 \
     --dataset dota \
     --phase eval \
     --conf_thresh 0.1 \
@@ -54,10 +51,15 @@ for i in $(seq 21 50); do
   cd "$DEVKIT_DIR"
   python dota_evaluation_task1.py > "$OUTPUT_DIR/eval_model_${i}.txt"
   cd "$PROJECT_DIR"
+
+  echo "Saved: $OUTPUT_DIR/eval_model_${i}.txt"
 done
+
+end_time=$(date +%s)
 
 echo "========================================"
 echo "Finished all evaluations"
 echo "End: $(date)"
+echo "Total runtime: $((end_time - start_time)) seconds"
 echo "Results saved in $OUTPUT_DIR"
 echo "========================================"

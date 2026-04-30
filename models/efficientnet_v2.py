@@ -886,9 +886,17 @@ class EfficientNetV2(nn.Module):
         return configs
 
     def _load_state(self, in_channels, n_classes, progress, tf_style_conv):
-        state_dict = model_zoo.load_url(
-            self.cfg["weight_url"], progress=progress, file_name=self.cfg["model_name"]
-        )
+        try:
+            state_dict = model_zoo.load_url(
+                self.cfg["weight_url"], progress=progress, file_name=self.cfg["model_name"]
+            )
+        except Exception as exc:
+            print(
+                "Warning: Failed to download/load pretrained weights "
+                f"for {self.cfg['model_name']}: {exc}. "
+                "Continuing with randomly initialized backbone."
+            )
+            return
 
         strict = True
 
