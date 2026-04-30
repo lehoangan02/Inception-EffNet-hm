@@ -8,7 +8,7 @@ As remote sensing and aerial imagery technologies rapidly evolve, the demand for
 
 # Validation Results on [DOTA-v1.0](https://captain-whu.github.io/DOTA/index.html)
 
-The model weights can be downloaded from the following links: [Baseline](https://huggingface.co/datasets/lehoangan02/attempt1_batchsize15/resolve/main/model_48.pth), [Ours](https://huggingface.co/datasets/lehoangan02/attempt7_hm5/resolve/main/model_48.pth)
+The model weights can be downloaded from the following links: [Baseline](https://huggingface.co/datasets/rabbitKabbit/attempt1_batchsize15/resolve/main/model_48.pth), [Ours](https://huggingface.co/datasets/rabbitKabbit/attempt7_hm5/resolve/main/model_48.pth)
 
 ```ruby
 ## Baseline: model_48.pth
@@ -26,7 +26,7 @@ Ubuntu 18.04, Python 3.6.10, PyTorch 1.6.0, OpenCV-Python 4.3.0.36
 
 # How To Start
 
-Download and follow the installation instructions for the DOTA development kit [DOTA_devkit](https://github.com/lehoangan02/DOTA_devkit) and put it under datasets folder.
+Download and follow the installation instructions for the DOTA development kit [DOTA_devkit](https://anonymous.4open.science/r/DOTA_devkit-0FE1) and put it under datasets folder.
 
 ## GPU Notes
 - Use a CUDA-enabled PyTorch build so `torch.cuda.is_available()` returns true.
@@ -37,11 +37,11 @@ Download and follow the installation instructions for the DOTA development kit [
 ## About DOTA
 
 ### Split Image
-Split the DOTA images from [DOTA_devkit](https://github.com/lehoangan02/DOTA_devkit) before training, testing and evaluation.
+Split the DOTA images from [DOTA_devkit](https://anonymous.4open.science/r/DOTA_devkit-0FE1) before training, testing and evaluation.
 
 The dota ```trainval``` and ```test``` datasets are cropped into ```608x608``` patches with a stride of `100` and two scales `0.5` and `1`.
 
-The splitted DOTA validation dataset can be found [here](https://huggingface.co/datasets/lehoangan02/BridgeTrain/resolve/main/Cross%20Validation/Validate_DOTA_1_0.5.zip?download=true)
+The splitted DOTA validation dataset can be found [here](https://huggingface.co/datasets/rabbitKabbit/BridgeTrain/resolve/main/Cross%20Validation/Validate_DOTA_1_0.5.zip?download=true)
 
 ### About Split TXT Files
 The `trainval.txt` and `test.txt` used in `datasets/dataset_dota.py` contain the list of image names without suffix, example:
