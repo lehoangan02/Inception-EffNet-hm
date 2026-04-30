@@ -8,16 +8,16 @@ As remote sensing and aerial imagery technologies rapidly evolve, the demand for
 
 # Validation Results on [DOTA-v1.0](https://captain-whu.github.io/DOTA/index.html)
 
-The model weights can be downloaded from the following links: [Baseline](https://huggingface.co/datasets/lehoangan02/attempt1_batchsize15/resolve/main/model_48.pth), [Ours](https://huggingface.co/datasets/lehoangan02/attempt7_hm5/resolve/main/model_40.pth)
+The model weights can be downloaded from the following links: [Baseline](https://huggingface.co/datasets/lehoangan02/attempt1_batchsize15/resolve/main/model_48.pth), [Ours](https://huggingface.co/datasets/lehoangan02/attempt7_hm5/resolve/main/model_48.pth)
 
 ```ruby
 ## Baseline: model_48.pth
 mAP: 0.6897542888248629
 ap of each class: plane:89.75650831, baseball-diamond:72.88169122, bridge:45.61292098, ground-track-field:52.31153892, small-vehicle:73.39054686, large-vehicle:83.48699099, ship:88.12793968, tennis-court:90.89564282, basketball-court:67.51528891, storage-tank:88.14011661, soccer-ball-field:38.62730525, roundabout:69.64524465, harbor:63.18137214, swimming-pool:64.4452618, helicopter:46.61306409
 
-## Ours: model_40.pth
-mAP: 0.7334235773973964
-ap of each class: plane:89.6967092, baseball-diamond:75.69345907, bridge:50.85142529, ground-track-field:68.06879174, small-vehicle:70.60914404, large-vehicle:83.9055576, ship:87.50747642, tennis-court:90.82852155, basketball-court:71.5196843, storage-tank:88.08672568, soccer-ball-field:68.00195632, roundabout:70.80480857, harbor:65.23533571, swimming-pool:64.29395758, helicopter:55.03181301
+## Ours: model_48.pth
+mAP: 0.7373316196409346
+ap of each class: plane:89.69814021, baseball-diamond:75.26651978, bridge:51.1799739, ground-track-field:66.04550627, small-vehicle:67.73603774, large-vehicle:83.73694647, ship:87.70576262, tennis-court:90.88199431, basketball-court:72.02409421, storage-tank:88.41285061, soccer-ball-field:73.4644523, roundabout:72.11833638, harbor:68.59598763, swimming-pool:64.55090114, helicopter:54.57992587
 ```
 
 
