@@ -6,18 +6,18 @@ As remote sensing and aerial imagery technologies rapidly evolve, the demand for
 	<img src="imgs/diagram.png", width="800">
 </p>
 
-# Evaluation Results on [DOTA-v1.0](https://captain-whu.github.io/DOTA/evaluation.html)
+# Validation Results on [DOTA-v1.0](https://captain-whu.github.io/DOTA/index.html)
 
-The model weights can be downloaded from the following links: [Baseline](https://huggingface.co/datasets/lehoangan02/attempt1_batchsize15/resolve/main/model_48.pth), [Ours](https://huggingface.co/datasets/lehoangan02/attempt6_hm10/resolve/main/model_50.pth)
+The model weights can be downloaded from the following links: [Baseline](https://huggingface.co/datasets/lehoangan02/attempt1_batchsize15/resolve/main/model_48.pth), [Ours](https://huggingface.co/datasets/lehoangan02/attempt7_hm5/resolve/main/model_40.pth)
 
 ```ruby
 ## Baseline: model_48.pth
-mAP: 0.7536283690546086
-ap of each class: plane:0.8862514770737425, baseball-diamond:0.8406009896282075, bridge:0.521285610860641, ground-track-field:0.6955552280263699, small-vehicle:0.7825702607967113, large-vehicle:0.8040010247209182, ship:0.8805575982076236, tennis-court:0.9087489402165854, basketball-court:0.8722663525600673, storage-tank:0.8638699841268725, soccer-ball-field:0.5610545208583243, roundabout:0.6562139014619145, harbor:0.6709747110284013, swimming-pool:0.7208480121858474, helicopter:0.6396269240669054
+mAP: 0.6897542888248629
+ap of each class: plane:89.75650831, baseball-diamond:72.88169122, bridge:45.61292098, ground-track-field:52.31153892, small-vehicle:73.39054686, large-vehicle:83.48699099, ship:88.12793968, tennis-court:90.89564282, basketball-court:67.51528891, storage-tank:88.14011661, soccer-ball-field:38.62730525, roundabout:69.64524465, harbor:63.18137214, swimming-pool:64.4452618, helicopter:46.61306409
 
-## Ours: model_50.pth
-mAP: 0.8234793611602195
-ap of each class: plane:0.8859121197958046, baseball-diamond:0.8483251642688572, bridge:0.5214374843409882, ground-track-field:0.6560710395759289, small-vehicle:0.7773671634218439, large-vehicle:0.7427879633964128, ship:0.8804625721887132, tennis-court:0.908816372618596, basketball-court:0.862399364058993, storage-tank:0.8670730838290734, soccer-ball-field:0.5987801663737911, roundabout:0.6401450110418495, harbor:0.6698206063852568, swimming-pool:0.7071826121359568, helicopter:0.672510279226682
+## Ours: model_40.pth
+mAP: 0.7334235773973964
+ap of each class: plane:89.6967092, baseball-diamond:75.69345907, bridge:50.85142529, ground-track-field:68.06879174, small-vehicle:70.60914404, large-vehicle:83.9055576, ship:87.50747642, tennis-court:90.82852155, basketball-court:71.5196843, storage-tank:88.08672568, soccer-ball-field:68.00195632, roundabout:70.80480857, harbor:65.23533571, swimming-pool:64.29395758, helicopter:55.03181301
 ```
 
 
@@ -35,6 +35,7 @@ Download and install the DOTA development kit [DOTA_devkit](https://github.com/l
 - Optional flags for debugging: `--heatmap_only` and `--phase loss` (see `--loss_epochs`).
 
 ## About DOTA
+
 ### Split Image
 Split the DOTA images from [DOTA_devkit](https://github.com/lehoangan02/DOTA_devkit) before training, testing and evaluation.
 
@@ -74,7 +75,7 @@ you may modify `datasets/dataset_dota.py` to adapt code to your own data.
 Create a tiny dataset subset (e.g. 5-20 images/labels) and update `trainval.txt`/`test.txt` to point to it. Then run:
 ```ruby
 python main.py --data_dir dataPath --epochs 1 --batch_size 1 --dataset dota --phase train --save_dir ./runs --pretrained
-python main.py --data_dir dataPath --batch_size 1 --dataset dota --phase test --resume model_1.pth
+# python main.py --data_dir dataPath --batch_size 1 --dataset dota --phase test --resume model_1.pth
 python main.py --data_dir dataPath --conf_thresh 0.1 --batch_size 1 --dataset dota --phase eval --resume model_1.pth
 ```
 
@@ -83,10 +84,10 @@ python main.py --data_dir dataPath --conf_thresh 0.1 --batch_size 1 --dataset do
 python main.py --data_dir dataPath --epochs 50 --batch_size 16 --dataset dota --phase train
 ```
 
-## Test Model
+<!-- ## Test Model
 ```ruby
 python main.py --data_dir dataPath --batch_size 16 --dataset dota --phase test
-```
+``` -->
 
 ## Evaluate Model
 ```ruby
