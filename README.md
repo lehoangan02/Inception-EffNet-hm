@@ -8,12 +8,12 @@ As remote sensing and aerial imagery technologies rapidly evolve, the demand for
 
 # Validation Results on [DOTA-v1.0](https://captain-whu.github.io/DOTA/index.html)
 
-The model weights can be downloaded from the following links: [Baseline](https://huggingface.co/datasets/rabbitKabbit/attempt1_batchsize15/resolve/main/model_48.pth), [Ours](https://huggingface.co/datasets/rabbitKabbit/attempt7_hm5/resolve/main/model_48.pth)
+The model weights can be downloaded from the following links: [Baseline](https://huggingface.co/datasets/rabbitKabbit/attempt2_batchsize20/resolve/main/model_50.pth), [Ours](https://huggingface.co/datasets/rabbitKabbit/attempt7_hm5/resolve/main/model_48.pth)
 
 ```ruby
-## Baseline: model_48.pth
-mAP: 0.6897542888248629
-ap of each class: plane:89.75650831, baseball-diamond:72.88169122, bridge:45.61292098, ground-track-field:52.31153892, small-vehicle:73.39054686, large-vehicle:83.48699099, ship:88.12793968, tennis-court:90.89564282, basketball-court:67.51528891, storage-tank:88.14011661, soccer-ball-field:38.62730525, roundabout:69.64524465, harbor:63.18137214, swimming-pool:64.4452618, helicopter:46.61306409
+## Baseline: model_50.pth
+mAP: 0.6458690174873016
+ap of each class: plane:89.3007906, baseball-diamond:70.66393795, bridge:36.75460756, ground-track-field:61.09327851, small-vehicle:30.44215374, large-vehicle:71.80267091, ship:85.50325898, tennis-court:90.84194978, basketball-court:66.59185562, storage-tank:78.86206304, soccer-ball-field:63.40755401, roundabout:58.71973467, harbor:63.22163028, swimming-pool:57.33294037, helicopter:44.26510022
 
 ## Ours: model_48.pth
 mAP: 0.7373316196409346
