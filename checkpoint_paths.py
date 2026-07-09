@@ -8,8 +8,6 @@ def default_save_dir():
     env_save_dir = os.environ.get('BBAV_SAVE_DIR')
     if env_save_dir:
         return env_save_dir
-    if os.path.isdir(DEFAULT_SHM_DIR) and os.access(DEFAULT_SHM_DIR, os.W_OK):
-        return DEFAULT_SHM_DIR
     return '.'
 
 
