@@ -267,10 +267,13 @@ class TrainModule(object):
                         loss = criterion(pr_decs, data_dict)
                     if self.scaler is not None:
                         self.scaler.scale(loss).backward()
+                        self.scaler.unscale_(self.optimizer)
+                        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=10.0)
                         self.scaler.step(self.optimizer)
                         self.scaler.update()
                     else:
                         loss.backward()
+                        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=10.0)
                         self.optimizer.step()
             else:
                 with torch.no_grad():
