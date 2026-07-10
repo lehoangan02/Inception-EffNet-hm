@@ -33,11 +33,11 @@ class BCELoss(nn.Module):
             mask = mask.unsqueeze(2).expand_as(pred).bool()
             p = pred.masked_select(mask).float()
             t = target.masked_select(mask).float()
-            if p.device.type in ['cuda', 'mps']:
-                with torch.autocast(device_type=p.device.type, enabled=False):
-                    loss = F.binary_cross_entropy(p, t, reduction='mean')
-            else:
-                loss = F.binary_cross_entropy(p, t, reduction='mean')
+            
+            # Manually compute BCE to avoid PyTorch's hard CUDA assert.
+            # This allows AMP GradScaler to catch NaNs and scale down gracefully instead of crashing.
+            p = torch.clamp(p, min=1e-7, max=1.0 - 1e-7)
+            loss = -(t * torch.log(p) + (1.0 - t) * torch.log(1.0 - p)).mean()
             return loss
         else:
             return 0.
