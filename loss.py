@@ -31,9 +31,13 @@ class BCELoss(nn.Module):
         pred = self._tranpose_and_gather_feat(output, ind)  # torch.Size([1, 500, 1])
         if mask.sum():
             mask = mask.unsqueeze(2).expand_as(pred).bool()
-            loss = F.binary_cross_entropy(pred.masked_select(mask).float(),
-                                          target.masked_select(mask).float(),
-                                          reduction='mean')
+            p = pred.masked_select(mask).float()
+            t = target.masked_select(mask).float()
+            if p.device.type in ['cuda', 'mps']:
+                with torch.autocast(device_type=p.device.type, enabled=False):
+                    loss = F.binary_cross_entropy(p, t, reduction='mean')
+            else:
+                loss = F.binary_cross_entropy(p, t, reduction='mean')
             return loss
         else:
             return 0.
