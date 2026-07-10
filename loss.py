@@ -31,8 +31,8 @@ class BCELoss(nn.Module):
         pred = self._tranpose_and_gather_feat(output, ind)  # torch.Size([1, 500, 1])
         if mask.sum():
             mask = mask.unsqueeze(2).expand_as(pred).bool()
-            loss = F.binary_cross_entropy(pred.masked_select(mask),
-                                          target.masked_select(mask),
+            loss = F.binary_cross_entropy(pred.masked_select(mask).float(),
+                                          target.masked_select(mask).float(),
                                           reduction='mean')
             return loss
         else:
