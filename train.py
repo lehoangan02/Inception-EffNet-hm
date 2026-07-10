@@ -50,7 +50,14 @@ class TrainModule(object):
         self.decoder = decoder
         self.down_ratio = down_ratio
         self.use_amp = self.device.type in ("cuda", "mps")
-        amp_dtype = torch.float16 if self.use_amp else None
+        if self.use_amp:
+            if self.device.type == "cuda" and torch.cuda.is_bf16_supported():
+                amp_dtype = torch.bfloat16
+            else:
+                amp_dtype = torch.float16
+        else:
+            amp_dtype = None
+            
         self.autocast_kwargs = (
             {"device_type": self.device.type, "dtype": amp_dtype}
             if self.use_amp
