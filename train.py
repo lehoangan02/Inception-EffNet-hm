@@ -49,7 +49,7 @@ class TrainModule(object):
         self.model = model
         self.decoder = decoder
         self.down_ratio = down_ratio
-        self.use_amp = self.device.type in ("cuda", "mps")
+        self.use_amp = self.device.type == "cuda"
         amp_dtype = torch.float16 if self.use_amp else None
         self.autocast_kwargs = (
             {"device_type": self.device.type, "dtype": amp_dtype}
@@ -160,7 +160,7 @@ class TrainModule(object):
 
         dataset_module = self.dataset[args.dataset]
 
-        dsets = {x: DOTA(data_dir=args.data_dir,
+        dsets = {x: dataset_module(data_dir=args.data_dir,
                                    phase=x,
                                    input_h=args.input_h,
                                    input_w=args.input_w,
@@ -209,7 +209,8 @@ class TrainModule(object):
         criterion = loss.LossAll(heatmap_only=getattr(args, 'heatmap_only', False))
         print('Setting up data...')
 
-        dsets = {x: DOTA(data_dir=args.data_dir,
+        dataset_module = self.dataset[args.dataset]
+        dsets = {x: dataset_module(data_dir=args.data_dir,
                          phase=x,
                          input_h=args.input_h,
                          input_w=args.input_w,
