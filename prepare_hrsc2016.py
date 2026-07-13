@@ -45,43 +45,15 @@ def prepare_dataset(base_dir):
             copied_xml_count += 1
     print(f"Copied {copied_xml_count} xml files.")
             
-    # 3. Create splits based on intersection of images and annotations
-    print("Creating splits...")
-    images = [os.path.splitext(f)[0] for f in os.listdir(all_images_dir) if f.endswith(('.bmp', '.jpg', '.png'))]
-    xmls = [os.path.splitext(f)[0] for f in os.listdir(annotations_dir) if f.endswith('.xml')]
-    
-    # Only keep IDs that have both image and annotation
-    valid_ids = list(set(images).intersection(set(xmls)))
-    print(f"Found {len(images)} total images in AllImages, {len(xmls)} annotations in Annotations.")
-    print(f"Total valid pairs (both image and xml exist): {len(valid_ids)}")
-    
-    if len(valid_ids) == 0:
-        print("No valid pairs found to split! Make sure images and xmls match.")
-        return
-        
-    valid_ids.sort()
-    random.seed(42)
-    random.shuffle(valid_ids)
-    
-    total = len(valid_ids)
-    train_end = int(total * 0.8)
-    val_end = int(total * 0.9)
-    
-    train_ids = valid_ids[:train_end]
-    val_ids = valid_ids[train_end:val_end]
-    test_ids = valid_ids[val_end:]
-    
-    def write_file(filename, ids):
-        filepath = os.path.join(base_dir, filename)
-        with open(filepath, 'w') as f:
-            for id in ids:
-                f.write(id + '\n')
-        print(f'Wrote {len(ids)} ids to {filepath}')
-        
-    write_file('train.txt', train_ids)
-    write_file('val.txt', val_ids)
-    write_file('test.txt', test_ids)
+    # 3. Use official splits instead of random splits
+    print("Copying official splits...")
+    for split_file in ['train.txt', 'val.txt', 'test.txt']:
+        src = os.path.join(base_dir, 'ImageSets', split_file)
+        dst = os.path.join(base_dir, split_file)
+        if os.path.exists(src):
+            shutil.copy(src, dst)
+            print(f"Copied {split_file} to root.")
     print("Done!")
 
 if __name__ == '__main__':
-    prepare_dataset('../DATA/HRSC2016_dataset/HRSC2016')
+    prepare_dataset('../DATA/HRSC2016')
