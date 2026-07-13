@@ -190,7 +190,7 @@ class TrainModule(object):
             self.scheduler.step()
             np.savetxt(os.path.join(save_path, 'train_loss.txt'), train_loss, fmt='%.6f')
 
-            if 'test' in self.dataset_phase[args.dataset] and epoch%5==0:
+            if 'test' in self.dataset_phase[args.dataset] and epoch%1==0:
                 mAP = self.dec_eval(args, dsets['test'])
                 ap_list.append(mAP)
                 np.savetxt(os.path.join(save_path, 'ap_list.txt'), ap_list, fmt='%.6f')

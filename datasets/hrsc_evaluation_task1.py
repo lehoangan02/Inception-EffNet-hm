@@ -23,18 +23,21 @@ import cv2
 def parse_gt(filename):
     objects = []
     target = ET.parse(filename).getroot()
-    for obj in target.iter('HRSC_Object'):
+    for obj in target.iter('object'):
         object_struct = {}
-        difficult = int(obj.find('difficult').text)
-        box_xmin = int(obj.find('box_xmin').text)  # bbox
-        box_ymin = int(obj.find('box_ymin').text)
-        box_xmax = int(obj.find('box_xmax').text)
-        box_ymax = int(obj.find('box_ymax').text)
-        mbox_cx = float(obj.find('mbox_cx').text)  # rbox
-        mbox_cy = float(obj.find('mbox_cy').text)
-        mbox_w = float(obj.find('mbox_w').text)
-        mbox_h = float(obj.find('mbox_h').text)
-        mbox_ang = float(obj.find('mbox_ang').text)*180/np.pi
+        difficult = int(obj.find('difficult').text) if obj.find('difficult') is not None else 0
+        robndbox = obj.find('robndbox')
+        if robndbox is not None:
+            mbox_cx = float(robndbox.find('cx').text)
+            mbox_cy = float(robndbox.find('cy').text)
+            mbox_w = float(robndbox.find('w').text)
+            mbox_h = float(robndbox.find('h').text)
+            # angle in HRSC2016MS is already in radians, needs to be converted to degrees for cv2.boxPoints?
+            # Wait, standard HRSC XML mbox_ang is in radians, we did mbox_ang*180/np.pi
+            mbox_ang = float(robndbox.find('angle').text) * 180 / np.pi
+        else:
+            continue # if there's no robndbox, we can't get the rotated box points
+
         rect = ((mbox_cx, mbox_cy), (mbox_w, mbox_h), mbox_ang)
         pts_4 = cv2.boxPoints(rect)  # 4 x 2
         bl = pts_4[0,:]
@@ -107,7 +110,7 @@ def voc_eval(detpath,
     for imagename in imagenames:
         R = [obj for obj in recs[imagename] if obj['name'] == classname]
         bbox = np.array([x['bbox'] for x in R])
-        difficult = np.array([x['difficult'] for x in R]).astype(np.bool)
+        difficult = np.array([x['difficult'] for x in R]).astype(bool)
         det = [False] * len(R)
         npos = npos + sum(~difficult)
         class_recs[imagename] = {'bbox': bbox,
