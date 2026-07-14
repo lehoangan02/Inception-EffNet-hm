@@ -199,6 +199,15 @@ class TrainModule(object):
                             epoch,
                             self.model,
                             self.optimizer)
+            
+            # Delete old checkpoint to save disk space (keep only last 5)
+            old_ckpt = os.path.join(save_path, 'model_{}.pth'.format(epoch - 5))
+            if os.path.exists(old_ckpt):
+                try:
+                    os.remove(old_ckpt)
+                    print(f"Deleted old checkpoint {old_ckpt} to save space.")
+                except Exception as e:
+                    print(f"Failed to delete {old_ckpt}: {e}")
 
     def calculate_checkpoint_losses(self, args):
         save_path = weights_dir(args)
