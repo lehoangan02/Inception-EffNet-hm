@@ -23,20 +23,15 @@ import cv2
 def parse_gt(filename):
     objects = []
     target = ET.parse(filename).getroot()
-    for obj in target.iter('object'):
+    for obj in target.iter('HRSC_Object'):
         object_struct = {}
         difficult = int(obj.find('difficult').text) if obj.find('difficult') is not None else 0
-        robndbox = obj.find('robndbox')
-        if robndbox is not None:
-            mbox_cx = float(robndbox.find('cx').text)
-            mbox_cy = float(robndbox.find('cy').text)
-            mbox_w = float(robndbox.find('w').text)
-            mbox_h = float(robndbox.find('h').text)
-            # angle in HRSC2016MS is already in radians, needs to be converted to degrees for cv2.boxPoints?
-            # Wait, standard HRSC XML mbox_ang is in radians, we did mbox_ang*180/np.pi
-            mbox_ang = float(robndbox.find('angle').text) * 180 / np.pi
-        else:
-            continue # if there's no robndbox, we can't get the rotated box points
+        mbox_cx = float(obj.find('mbox_cx').text)
+        mbox_cy = float(obj.find('mbox_cy').text)
+        mbox_w = float(obj.find('mbox_w').text)
+        mbox_h = float(obj.find('mbox_h').text)
+        # HRSC mbox_ang is in radians, convert to degrees
+        mbox_ang = float(obj.find('mbox_ang').text) * 180 / np.pi
 
         rect = ((mbox_cx, mbox_cy), (mbox_w, mbox_h), mbox_ang)
         pts_4 = cv2.boxPoints(rect)  # 4 x 2
