@@ -178,6 +178,7 @@ class TrainModule(object):
         print('Starting training...')
         train_loss = []
         ap_list = []
+        best_map = 0.0
         for epoch in range(start_epoch, args.num_epoch+1):
             print('-'*10)
             print(f"Dataset length: {len(dsets['train'])}")
@@ -194,14 +195,23 @@ class TrainModule(object):
                 mAP = self.dec_eval(args, dsets['test'])
                 ap_list.append(mAP)
                 np.savetxt(os.path.join(save_path, 'ap_list.txt'), ap_list, fmt='%.6f')
+            else:
+                mAP = 0.0
 
             self.save_model(os.path.join(save_path, 'model_{}.pth'.format(epoch)),
                             epoch,
                             self.model,
                             self.optimizer)
             
-            # Delete old checkpoint to save disk space (keep only last 5)
-            old_ckpt = os.path.join(save_path, 'model_{}.pth'.format(epoch - 5))
+            if mAP > best_map:
+                best_map = mAP
+                import shutil
+                shutil.copy(os.path.join(save_path, 'model_{}.pth'.format(epoch)), 
+                            os.path.join(save_path, 'model_best.pth'))
+                print('Saved new best model with mAP: {}'.format(best_map))
+            
+            # Delete old checkpoint to save disk space (keep only last 2)
+            old_ckpt = os.path.join(save_path, 'model_{}.pth'.format(epoch - 2))
             if os.path.exists(old_ckpt):
                 try:
                     os.remove(old_ckpt)
