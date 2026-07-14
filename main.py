@@ -14,7 +14,7 @@ def parse_args():
     parser.add_argument('--num_epoch', '--epochs', dest='num_epoch', type=int, default=1, help='Number of epochs')
     parser.add_argument('--batch_size', type=int, default=16, help='Number of batch size')
     parser.add_argument('--num_workers', type=int, default=4, help='Number of workers')
-    parser.add_argument('--init_lr', type=float, default=1.25e-3, help='Initial learning rate')
+    parser.add_argument('--init_lr', type=float, default=1.25e-4, help='Initial learning rate')
     parser.add_argument('--input_h', type=int, default=608, help='Resized image height')
     parser.add_argument('--input_w', type=int, default=608, help='Resized image width')
     parser.add_argument('--K', type=int, default=500, help='Maximum of objects')
