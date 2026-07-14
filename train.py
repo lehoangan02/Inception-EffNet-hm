@@ -265,7 +265,10 @@ class TrainModule(object):
                     )
                     with autocast_ctx:
                         pr_decs = self.model(data_dict['input'])
-                        loss = criterion(pr_decs, data_dict)
+                    
+                    if self.use_amp:
+                        pr_decs = {k: v.float() for k, v in pr_decs.items()}
+                    loss = criterion(pr_decs, data_dict)
                     if self.scaler is not None:
                         self.scaler.scale(loss).backward()
                         self.scaler.step(self.optimizer)
@@ -282,7 +285,10 @@ class TrainModule(object):
                     )
                     with autocast_ctx:
                         pr_decs = self.model(data_dict['input'])
-                        loss = criterion(pr_decs, data_dict)
+                    
+                    if self.use_amp:
+                        pr_decs = {k: v.float() for k, v in pr_decs.items()}
+                    loss = criterion(pr_decs, data_dict)
 
             running_loss += loss.item()
         epoch_loss = running_loss / len(data_loader)
