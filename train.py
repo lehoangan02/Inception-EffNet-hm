@@ -179,6 +179,17 @@ class TrainModule(object):
         train_loss = []
         ap_list = []
         best_map = 0.0
+        ap_list_path = os.path.join(save_path, 'ap_list.txt')
+        if args.resume_train and os.path.exists(ap_list_path):
+            try:
+                loaded_ap = np.loadtxt(ap_list_path)
+                ap_list = loaded_ap.tolist() if loaded_ap.ndim > 0 else [float(loaded_ap)]
+                if len(ap_list) > 0:
+                    best_map = max(ap_list)
+                    print(f"Restored previous best mAP: {best_map*100:.2f}%")
+            except Exception as e:
+                print(f"Could not restore previous best mAP: {e}")
+        
         for epoch in range(start_epoch, args.num_epoch+1):
             print('-'*10)
             print(f"Dataset length: {len(dsets['train'])}")
@@ -208,7 +219,10 @@ class TrainModule(object):
                 import shutil
                 shutil.copy(os.path.join(save_path, 'model_{}.pth'.format(epoch)), 
                             os.path.join(save_path, 'model_best.pth'))
-                print('Saved new best model with mAP: {}'.format(best_map))
+                print('>>> Saved new BEST model (model_best.pth) with mAP: {:.2f}% <<<'.format(best_map * 100))
+            else:
+                if 'test' in self.dataset_phase[args.dataset]:
+                    print('Current best mAP remains: {:.2f}%'.format(best_map * 100))
             
             # Delete old checkpoint to save disk space (keep only last 2)
             old_ckpt = os.path.join(save_path, 'model_{}.pth'.format(epoch - 2))
