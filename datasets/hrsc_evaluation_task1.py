@@ -241,7 +241,7 @@ def main():
                                  imagesetfile,
                                  classname,
                                  ovthresh=0.5,
-                                 use_07_metric=True)
+                                 use_07_metric=False)
         map = map + ap
         #print('rec: ', rec, 'prec: ', prec, 'ap: ', ap)
         print('ap: ', ap)
