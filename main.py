@@ -23,6 +23,7 @@ def parse_args():
     parser.add_argument('--resume_train', type=str, default='', help='Weights resumed in training')
     parser.add_argument('--pretrained_model', type=str, default='', help='Pretrained weights for initialization (strict=False, ignores optimizer/epoch)')
     parser.add_argument('--weight_decay', type=float, default=0.0, help='L2 Regularization / weight decay')
+    parser.add_argument('--disable_amp', action='store_true', help='Disable Automatic Mixed Precision (FP16) to prevent overflow')
     parser.add_argument('--resume', type=str, default='model_50.pth', help='Weights resumed in testing and evaluation')
     parser.add_argument('--save_dir', type=str, default=default_save_dir(),
                         help='Root directory for weights_<dataset>; defaults to BBAV_SAVE_DIR, then /dev/shm if writable')

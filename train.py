@@ -49,7 +49,7 @@ class TrainModule(object):
         self.model = model
         self.decoder = decoder
         self.down_ratio = down_ratio
-        self.use_amp = self.device.type == "cuda"
+        self.use_amp = (self.device.type == "cuda") and not getattr(args, 'disable_amp', False)
         amp_dtype = torch.float16 if self.use_amp else None
         self.autocast_kwargs = (
             {"device_type": self.device.type, "dtype": amp_dtype}
