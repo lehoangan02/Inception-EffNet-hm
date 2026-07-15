@@ -236,16 +236,22 @@ def main():
     map = 0
     for classname in classnames:
         print('classname:', classname)
-        rec, prec, ap = voc_eval(detpath,
+        rec, prec, ap_12 = voc_eval(detpath,
                                  annopath,
                                  imagesetfile,
                                  classname,
                                  ovthresh=0.5,
                                  use_07_metric=False)
-        map = map + ap
+        _, _, ap_07 = voc_eval(detpath,
+                                 annopath,
+                                 imagesetfile,
+                                 classname,
+                                 ovthresh=0.5,
+                                 use_07_metric=True)
+        map = map + ap_07
         #print('rec: ', rec, 'prec: ', prec, 'ap: ', ap)
-        print('ap: ', ap)
-        classaps.append(ap)
+        print('ap_07: {:.2f}%, ap_12: {:.2f}%'.format(ap_07*100, ap_12*100))
+        classaps.append(ap_07)
 
         # umcomment to show p-r curve of each category
         # plt.figure(figsize=(8,4))

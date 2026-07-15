@@ -101,15 +101,21 @@ class HRSC(BaseDataset):
             if classname == 'background':
                 continue
             print('classname:', classname)
-            rec, prec, ap = voc_eval(detpath,
+            rec, prec, ap_12 = voc_eval(detpath,
                                      annopath,
                                      imagesetfile,
                                      classname,
                                      ovthresh=0.5,
                                      use_07_metric=False)
-            map = map + ap
+            _, _, ap_07 = voc_eval(detpath,
+                                     annopath,
+                                     imagesetfile,
+                                     classname,
+                                     ovthresh=0.5,
+                                     use_07_metric=True)
+            map = map + ap_07
             # print('rec: ', rec, 'prec: ', prec, 'ap: ', ap)
-            print('{}:{} '.format(classname, ap*100))
+            print('{}: mAP(07): {:.2f}%, mAP(12): {:.2f}%'.format(classname, ap_07*100, ap_12*100))
             classaps.append(ap)
             # umcomment to show p-r curve of each category
             # plt.figure(figsize=(8,4))
