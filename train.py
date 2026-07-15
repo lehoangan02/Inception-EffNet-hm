@@ -29,7 +29,7 @@ def collater(data):
     return out_data_dict
 
 class TrainModule(object):
-    def __init__(self, dataset, num_classes, model, decoder, down_ratio):
+    def __init__(self, dataset, num_classes, model, decoder, down_ratio, disable_amp=False):
         torch.manual_seed(317)
         self.dataset = dataset
         self.dataset_phase = {'dota': ['train'],
@@ -49,7 +49,7 @@ class TrainModule(object):
         self.model = model
         self.decoder = decoder
         self.down_ratio = down_ratio
-        self.use_amp = (self.device.type == "cuda") and not getattr(args, 'disable_amp', False)
+        self.use_amp = (self.device.type == "cuda") and not disable_amp
         amp_dtype = torch.float16 if self.use_amp else None
         self.autocast_kwargs = (
             {"device_type": self.device.type, "dtype": amp_dtype}

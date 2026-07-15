@@ -71,7 +71,8 @@ if __name__ == '__main__':
                                        num_classes=num_classes,
                                        model=model,
                                        decoder=decoder,
-                                       down_ratio=down_ratio)
+                                       down_ratio=down_ratio,
+                                       disable_amp=args.disable_amp)
 
         ctrbox_obj.train_network(args)
     elif args.phase == 'loss':
@@ -79,7 +80,8 @@ if __name__ == '__main__':
                                        num_classes=num_classes,
                                        model=model,
                                        decoder=decoder,
-                                       down_ratio=down_ratio)
+                                       down_ratio=down_ratio,
+                                       disable_amp=args.disable_amp)
         ctrbox_obj.calculate_checkpoint_losses(args)
     elif args.phase == 'test':
         ctrbox_obj = test.TestModule(dataset=dataset, num_classes=num_classes, model=model, decoder=decoder)
