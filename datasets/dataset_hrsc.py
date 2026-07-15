@@ -116,7 +116,7 @@ class HRSC(BaseDataset):
             map = map + ap_07
             # print('rec: ', rec, 'prec: ', prec, 'ap: ', ap)
             print('{}: mAP(07): {:.2f}%, mAP(12): {:.2f}%'.format(classname, ap_07*100, ap_12*100))
-            classaps.append(ap)
+            classaps.append(ap_07)
             # umcomment to show p-r curve of each category
             # plt.figure(figsize=(8,4))
             # plt.xlabel('recall')

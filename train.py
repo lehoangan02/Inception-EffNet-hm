@@ -123,8 +123,7 @@ class TrainModule(object):
         return self.load_model(model, None, resume, strict=strict)
 
     def train_network(self, args):
-
-        self.optimizer = torch.optim.Adam(self.model.parameters(), args.init_lr)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), args.init_lr, weight_decay=args.weight_decay)
         self.scheduler = torch.optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.96, last_epoch=-1)
         save_path = weights_dir(args)
         start_epoch = 1
