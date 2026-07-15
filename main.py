@@ -21,6 +21,7 @@ def parse_args():
     parser.add_argument('--conf_thresh', type=float, default=0.1, help='Confidence threshold, 0.1 for general evaluation')
     parser.add_argument('--ngpus', type=int, default=1, help='Number of gpus, ngpus>1 for multigpu')
     parser.add_argument('--resume_train', type=str, default='', help='Weights resumed in training')
+    parser.add_argument('--pretrained_model', type=str, default='', help='Pretrained weights for initialization (strict=False, ignores optimizer/epoch)')
     parser.add_argument('--resume', type=str, default='model_50.pth', help='Weights resumed in testing and evaluation')
     parser.add_argument('--save_dir', type=str, default=default_save_dir(),
                         help='Root directory for weights_<dataset>; defaults to BBAV_SAVE_DIR, then /dev/shm if writable')

@@ -130,6 +130,14 @@ class TrainModule(object):
         start_epoch = 1
         
         # add resume part for continuing training when break previously, 10-16-2020
+        if getattr(args, 'pretrained_model', ''):
+            pretrained_path = resolve_checkpoint_path(args, args.pretrained_model)
+            self.model, _, _ = self.load_model(self.model,
+                                               None,
+                                               pretrained_path,
+                                               strict=False)
+            print(f'Loaded pretrained model from {pretrained_path} (epoch and optimizer ignored)')
+
         if args.resume_train:
             resume_train = resolve_checkpoint_path(args, args.resume_train)
             self.model, self.optimizer, start_epoch = self.load_model(self.model,
