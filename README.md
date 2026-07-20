@@ -11,7 +11,7 @@ As remote sensing and aerial imagery technologies rapidly evolve, the demand for
 The model weights can be downloaded from the following links: [Baseline](https://drive.google.com/file/d/1uqb1hTcdzsx3xZnIWoGXSmEIThWkOADp/view?usp=drive_link), [Ours](https://drive.google.com/file/d/1gl48egGwBE2JUJ_Ll_zpUyN4fqfGYniL/view?usp=sharing)
 
 ```ruby
-## Baseline: model_48.pth
+## Baseline: model_50.pth
 mAP: 0.7536283690546086
 ap of each class: plane:88.62514771, baseball-diamond:84.06009896, bridge:52.12856109, ground-track-field:69.55552280, small-vehicle:78.25702608, large-vehicle:80.40010247, ship:88.05575982, tennis-court:90.87489402, basketball-court:87.22663526, storage-tank:86.38699841, soccer-ball-field:56.10545209, roundabout:65.62139015, harbor:67.09747110, swimming-pool:72.08480122, helicopter:63.96269241
 
