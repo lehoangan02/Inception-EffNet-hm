@@ -1,23 +1,23 @@
-# Improving Oriented Object Detection in Aerial Images with Inception-Enhanced EfficientNetV2
+# Multi-Scale Feature Aggregation and Center-Localization Pretraining for Oriented Object Detection
 
-As remote sensing and aerial imagery technologies rapidly evolve, the demand for highly accurate and efficient oriented object detection remains a prominent challenge. While current baseline models evaluated on the DOTA dataset provide a solid foundation, they often lack the receptive diversity necessary to resolve densely packed objects and extreme scale variations inherent in aerial views. In this paper, we propose a structurally adapted anchor-free framework that systematically addresses these spatial limitations. Specifically, we leverage compound scaling via EfficientNetV2 and integrate a multi-scale spatial feature aggregation module into the Box Parameters head to capture diverse receptive fields. Crucially, we establish a rigorous, task-specific heatmap pretraining strategy focused strictly on object center localization. This calibrated training protocol serves as a strong methodological foundation, providing a robust initialization that significantly minimizes early-stage misclassification errors. Comprehensive experiments demonstrate that these problem-driven modifications collectively improve the mean Average Precision (mAP) on the DOTA dataset by 4.75\% over the baseline. Our findings underscore the distinct advantages of pairing calibrated training protocols with targeted architectural adaptations to achieve robust aerial object detection.
+As remote sensing and aerial imagery technologies rapidly evolve, the demand for highly accurate oriented object detection remains a prominent challenge. While current baseline models evaluated on the DOTA dataset provide a solid foundation, they often lack the receptive diversity necessary to resolve densely packed objects and extreme scale variations inherent in aerial views. In this paper, we propose a structurally adapted anchor-free framework that systematically addresses these spatial limitations. We introduce a multi-scale feature aggregation module (MSAM) within the Box Parameters head to resolve extreme aspect ratios, coupled with a calibrated initialization protocol that overcomes the optimization instability typical of anchor-free models. Crucially, we establish a task-specific heatmap pretraining strategy focused strictly on object center localization to minimize early-stage misclassification errors. Comprehensive experiments on the DOTA dataset demonstrate the data efficiency of our approach. Trained exclusively on the standard training split, our model achieves 75.98\% mAP, outperforming the peak performance of the standard Box Boundary-Aware Vectors baseline at 75.36\% mAP which requires training on the expanded train-and-validation splits. Our findings underscore the advantages of pairing calibrated training protocols with targeted architectural adaptations for data-efficient oriented object detection.
 
 <p align="center">
 	<img src="imgs/diagram.png", width="800">
 </p>
 
-# Validation Results on [DOTA-v1.0](https://captain-whu.github.io/DOTA/index.html)
+# Testing Results on [DOTA-v1.0](https://captain-whu.github.io/DOTA/index.html)
 
-The model weights can be downloaded from the following links: [Baseline](https://huggingface.co/datasets/rabbitKabbit/attempt2_batchsize20/resolve/main/model_48.pth), [Ours](https://huggingface.co/datasets/rabbitKabbit/attempt7_hm5/resolve/main/model_48.pth)
+The model weights can be downloaded from the following links: [Baseline](https://drive.google.com/file/d/1uqb1hTcdzsx3xZnIWoGXSmEIThWkOADp/view?usp=drive_link), [Ours](https://drive.google.com/file/d/1gl48egGwBE2JUJ_Ll_zpUyN4fqfGYniL/view?usp=sharing)
 
 ```ruby
 ## Baseline: model_48.pth
-mAP: 0.651276870747776
-ap of each class: plane:89.28886437, baseball-diamond:69.5041776, bridge:35.48634651, ground-track-field:63.9951955, small-vehicle:33.92909761, large-vehicle:73.30861213, ship:85.12650447, tennis-court:90.84121717, basketball-court:66.51649835, storage-tank:78.62078747, soccer-ball-field:63.95158333, roundabout:58.89787315, harbor:63.61916395, swimming-pool:55.55607824, helicopter:48.27330628
+mAP: 0.7536283690546086
+ap of each class: plane:88.62514771, baseball-diamond:84.06009896, bridge:52.12856109, ground-track-field:69.55552280, small-vehicle:78.25702608, large-vehicle:80.40010247, ship:88.05575982, tennis-court:90.87489402, basketball-court:87.22663526, storage-tank:86.38699841, soccer-ball-field:56.10545209, roundabout:65.62139015, harbor:67.09747110, swimming-pool:72.08480122, helicopter:63.96269241
 
-## Ours: model_48.pth
-mAP: 0.7373316196409346
-ap of each class: plane:89.69814021, baseball-diamond:75.26651978, bridge:51.1799739, ground-track-field:66.04550627, small-vehicle:67.73603774, large-vehicle:83.73694647, ship:87.70576262, tennis-court:90.88199431, basketball-court:72.02409421, storage-tank:88.41285061, soccer-ball-field:73.4644523, roundabout:72.11833638, harbor:68.59598763, swimming-pool:64.55090114, helicopter:54.57992587
+## Ours: model_73.pth
+mAP: 0.7597520192929833
+ap of each class: plane:88.65230014, baseball-diamond:84.77466462, bridge:54.70068208, ground-track-field:69.77795239, small-vehicle:79.34679051, large-vehicle:83.50117096, ship:87.45518086, tennis-court:90.88184315, basketball-court:86.82064228, storage-tank:86.60548695, soccer-ball-field:55.16758990, roundabout:73.49078311, harbor:65.86082071, swimming-pool:72.55930986, helicopter:60.03281142
 ```
 
 
