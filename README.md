@@ -63,9 +63,7 @@ Examples:
 428.0 6.0 519.0 66.0 492.0 108.0 405.0 50.0 bridge 0
 ```
 
-## Data Arrangement
-
-### DOTA
+### Data Arrangement
 ```
 data_dir/
         images/*.png
@@ -75,34 +73,8 @@ data_dir/
 ```
 you may modify `datasets/dataset_dota.py` to adapt code to your own data.
 
-### HRSC2016
-```
-data_dir/
-        AllImages/*.bmp
-        Annotations/*.xml
-        train.txt
-        test.txt
-```
-
-`train.txt` and `test.txt` should contain image ids (one id per line, without file extension).
-
-## Testing Results on HRSC2016
-
-HRSC model weights: [Google Drive](https://drive.google.com/file/d/1_1ov_lqV8OWXoYYGPIa2izrnuA4r_-y1/view?usp=sharing)
-
-HRSC2016 dataset: [Hugging Face](https://huggingface.co/datasets/rabbitKabbit/HSRC/resolve/main/HRSC2016.zip?download=true)
-
-BBAVectors+rh (Baseline) [23] ResNet101 88.60
-EfficientNetV2+MSAM (Ours) EfficientNetV2 89.85
-
-## HRSC Commands
-```ruby
-python main.py --data_dir dataPath --epochs 50 --batch_size 16 --dataset hrsc --phase train
-python main.py --data_dir dataPath --conf_thresh 0.1 --batch_size 1 --dataset hrsc --phase eval --resume model_best.pth
-```
-
 ## Quick GPU Sanity Check (Small Batch)
-Create a tiny dataset subset (e.g. 5-20 images/labels) and update `trainval.txt`/`test.txt` to point to it. Then run:
+Create a tiny DOTA subset (e.g. 5-20 images/labels) and update `trainval.txt`/`test.txt` to point to it. Then run:
 ```ruby
 python main.py --data_dir dataPath --epochs 1 --batch_size 1 --dataset dota --phase train --save_dir ./runs --pretrained
 # python main.py --data_dir dataPath --batch_size 1 --dataset dota --phase test --resume model_1.pth
@@ -114,16 +86,39 @@ python main.py --data_dir dataPath --conf_thresh 0.1 --batch_size 1 --dataset do
 python main.py --data_dir dataPath --epochs 50 --batch_size 16 --dataset dota --phase train
 ```
 
-<!-- ## Test Model
-```ruby
-python main.py --data_dir dataPath --batch_size 16 --dataset dota --phase test
-``` -->
-
 ## Evaluate Model
 ```ruby
 python main.py --data_dir dataPath --conf_thresh 0.1 --batch_size 16 --dataset dota --phase eval
 ```
 
-You may change `conf_thresh` to get a better `mAP`. 
+You may change `conf_thresh` to get a better `mAP`.
 
 Please zip and upload the generated `merge_dota` for DOTA [Task1](https://captain-whu.github.io/DOTA/evaluation.html) evaluation.
+
+## About HRSC2016
+
+### Data Arrangement
+```
+data_dir/
+        AllImages/*.bmp
+        Annotations/*.xml
+        train.txt
+        test.txt
+```
+
+`train.txt` and `test.txt` should contain image ids (one id per line, without file extension).
+
+## HRSC Commands
+```ruby
+python main.py --data_dir dataPath --epochs 50 --batch_size 16 --dataset hrsc --phase train
+python main.py --data_dir dataPath --conf_thresh 0.1 --batch_size 1 --dataset hrsc --phase eval --resume model_best.pth
+```
+
+## Testing Results on HRSC2016
+
+HRSC model weights: [Google Drive](https://drive.google.com/file/d/1_1ov_lqV8OWXoYYGPIa2izrnuA4r_-y1/view?usp=sharing)
+
+HRSC2016 dataset: [Hugging Face](https://huggingface.co/datasets/rabbitKabbit/HSRC/resolve/main/HRSC2016.zip?download=true)
+
+BBAVectors+rh (Baseline) [23] ResNet101 88.60
+EfficientNetV2+MSAM (Ours) EfficientNetV2 89.85
