@@ -1,6 +1,6 @@
 # Multi-Scale Feature Aggregation and Center-Localization Pretraining for Oriented Object Detection
 
-As remote sensing and aerial imagery technologies rapidly evolve, the demand for highly accurate oriented object detection remains a prominent challenge. While current baseline models evaluated on the [...]
+As remote sensing and aerial imagery technologies rapidly evolve, the demand for highly accurate oriented object detection remains a prominent challenge. While current baseline models evaluated on the DOTA dataset provide a solid foundation, they often lack the receptive diversity necessary to resolve densely packed objects and extreme scale variations inherent in aerial views. In this paper, we propose a structurally adapted anchor-free framework that systematically addresses these spatial limitations. We introduce a multi-scale feature aggregation module within the Box Parameters head to resolve extreme aspect ratios, coupled with a calibrated initialization protocol that overcomes the optimization instability typical of anchor-free models. Crucially, we establish a task-specific heatmap pretraining strategy focused strictly on object center localization to minimize early-stage misclassification errors. Comprehensive experiments on the DOTA dataset demonstrate the data efficiency of our approach. Trained exclusively on the standard training split, our model achieves 75.98\% mAP, outperforming the peak performance of the standard Box Boundary-Aware Vectors baseline at 75.36\% mAP which requires training on the expanded train-and-validation splits. Our findings underscore the advantages of pairing calibrated training protocols with targeted architectural adaptations for data-efficient oriented object detection.
 
 <p align="center">
 	<img src="imgs/diagram.png", width="800">
@@ -8,77 +8,17 @@ As remote sensing and aerial imagery technologies rapidly evolve, the demand for
 
 # Testing Results on [DOTA-v1.0](https://captain-whu.github.io/DOTA/index.html)
 
-The model weights can be downloaded from the following links: [Baseline](https://drive.google.com/file/d/1uqb1hTcdzsx3xZnIWoGXSmEIThWkOADp/view?usp=drive_link), [Ours](https://drive.google.com/fil[...]
+The model weights can be downloaded from the following links: [Baseline](https://drive.google.com/file/d/1uqb1hTcdzsx3xZnIWoGXSmEIThWkOADp/view?usp=drive_link), [Ours](https://drive.google.com/file/d/1xOBfz5-LPQr2td7xXSoI9Qhqb3K8zmI-/view?usp=sharing)
 
 ```ruby
 ## Baseline: model_50.pth
 mAP: 0.7536283690546086
-ap of each class: plane:88.62514771, baseball-diamond:84.06009896, bridge:52.12856109, ground-track-field:69.55552280, small-vehicle:78.25702608, large-vehicle:80.40010247, ship:88.05575982, tenni[...]
+ap of each class: plane:88.62514771, baseball-diamond:84.06009896, bridge:52.12856109, ground-track-field:69.55552280, small-vehicle:78.25702608, large-vehicle:80.40010247, ship:88.05575982, tennis-court:90.87489402, basketball-court:87.22663526, storage-tank:86.38699841, soccer-ball-field:56.10545209, roundabout:65.62139015, harbor:67.09747110, swimming-pool:72.08480122, helicopter:63.96269241
 
 ## Ours: model_55.pth
 mAP: 0.7597520192929833
-ap of each class: plane:88.65230014, baseball-diamond:84.77466462, bridge:54.70068208, ground-track-field:69.77795239, small-vehicle:79.34679051, large-vehicle:83.50117096, ship:87.45518086, tenni[...]
+ap of each class: plane:88.65230014, baseball-diamond:84.77466462, bridge:54.70068208, ground-track-field:69.77795239, small-vehicle:79.34679051, large-vehicle:83.50117096, ship:87.45518086, tennis-court:90.88184315, basketball-court:86.82064228, storage-tank:86.60548695, soccer-ball-field:55.16758990, roundabout:73.49078311, harbor:65.86082071, swimming-pool:72.55930986, helicopter:60.03281142
 ```
-
-# Testing Results on [HRSC2016](https://www.kaggle.com/datasets/guofeng/hrsc2016)
-
-The HRSC2016 model weights can be downloaded from [here](https://drive.google.com/file/d/1_1ov_lqV8OWXoYYGPIa2izrnuA4r_-y1/view?usp=sharing).
-
-## HRSC Dataset
-
-Download the HRSC2016 dataset from [here](https://huggingface.co/datasets/rabbitKabbit/HSRC/resolve/main/HRSC2016.zip?download=true).
-
-### HRSC Data Arrangement
-
-Extract the HRSC2016 dataset and arrange it as follows:
-
-```
-data_dir/
-        images/*.jpg
-        annotations/*.xml
-        train.txt
-        val.txt
-        test.txt
-```
-
-The `train.txt`, `val.txt`, and `test.txt` files should contain the list of image names without suffix, example:
-```
-000001
-000002
-000003
-```
-
-You may modify `datasets/dataset_hrsc.py` to adapt the code to your own data format.
-
-### HRSC Quick GPU Sanity Check (Small Batch)
-
-Create a tiny dataset subset (e.g. 5-20 images/labels) and update `train.txt`/`val.txt`/`test.txt` to point to it. Then run:
-
-```ruby
-python main.py --data_dir dataPath --epochs 1 --batch_size 1 --dataset hrsc --phase train --save_dir ./runs --pretrained
-python main.py --data_dir dataPath --batch_size 1 --dataset hrsc --phase test --resume model_1.pth
-python main.py --data_dir dataPath --conf_thresh 0.1 --batch_size 1 --dataset hrsc --phase eval --resume model_1.pth
-```
-
-### HRSC Train Model
-
-```ruby
-python main.py --data_dir dataPath --epochs 100 --batch_size 16 --dataset hrsc --phase train
-```
-
-### HRSC Test Model
-
-```ruby
-python main.py --data_dir dataPath --batch_size 16 --dataset hrsc --phase test --resume model_100.pth
-```
-
-### HRSC Evaluate Model
-
-```ruby
-python main.py --data_dir dataPath --conf_thresh 0.5 --batch_size 16 --dataset hrsc --phase eval --resume model_100.pth
-```
-
-You may adjust `conf_thresh` to optimize detection results. For HRSC2016, a confidence threshold of 0.5 is recommended as a starting point.
 
 
 # Dependencies
