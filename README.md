@@ -75,6 +75,32 @@ data_dir/
 ```
 you may modify `datasets/dataset_dota.py` to adapt code to your own data.
 
+### HRSC2016
+```
+data_dir/
+        AllImages/*.bmp
+        Annotations/*.xml
+        train.txt
+        test.txt
+```
+
+`train.txt` and `test.txt` should contain image ids (one id per line, without file extension).
+
+## Testing Results on HRSC2016
+
+HRSC model weights: [Google Drive](https://drive.google.com/file/d/1_1ov_lqV8OWXoYYGPIa2izrnuA4r_-y1/view?usp=sharing)
+
+HRSC2016 dataset: [Hugging Face](https://huggingface.co/datasets/rabbitKabbit/HSRC/resolve/main/HRSC2016.zip?download=true)
+
+BBAVectors+rh (Baseline) [23] ResNet101 88.60
+EfficientNetV2+MSAM (Ours) EfficientNetV2 89.85
+
+## HRSC Commands
+```ruby
+python main.py --data_dir dataPath --epochs 50 --batch_size 16 --dataset hrsc --phase train
+python main.py --data_dir dataPath --conf_thresh 0.1 --batch_size 1 --dataset hrsc --phase eval --resume model_best.pth
+```
+
 ## Quick GPU Sanity Check (Small Batch)
 Create a tiny dataset subset (e.g. 5-20 images/labels) and update `trainval.txt`/`test.txt` to point to it. Then run:
 ```ruby
