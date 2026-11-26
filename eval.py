@@ -27,13 +27,13 @@ class EvalModule(object):
         self.model = self.model.to(self.device)
         self.model.eval()
 
-        result_path = 'result_'+args.dataset
+        result_path = "result_"+args.dataset+"_"+os.environ.get("EVAL_PHASE", "test")
         if not os.path.exists(result_path):
             os.mkdir(result_path)
 
         dataset_module = self.dataset[args.dataset]
         dsets = dataset_module(data_dir=args.data_dir,
-                               phase='test',
+                               phase="test",
                                input_h=args.input_h,
                                input_w=args.input_w,
                                down_ratio=down_ratio)

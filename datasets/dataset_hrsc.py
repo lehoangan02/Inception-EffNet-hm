@@ -23,7 +23,7 @@ class HRSC(BaseDataset):
         self.label_path = os.path.join(data_dir, 'Annotations')
 
     def load_img_ids(self):
-        image_set_index_file = os.path.join(self.data_dir, self.phase + '.txt')
+        image_set_index_file = os.path.join(self.data_dir, os.environ.get("EVAL_PHASE", self.phase) + ".txt")
         assert os.path.exists(image_set_index_file), 'Path does not exist: {}'.format(image_set_index_file)
         with open(image_set_index_file, 'r') as f:
             lines = f.readlines()
@@ -94,7 +94,7 @@ class HRSC(BaseDataset):
     def dec_evaluation(self, result_path):
         detpath = os.path.join(result_path, 'Task1_{}.txt')
         annopath = os.path.join(self.label_path, '{}.xml')  # change the directory to the path of val/labelTxt, if you want to do evaluation on the valset
-        imagesetfile = os.path.join(self.data_dir, 'test.txt')
+        imagesetfile = os.path.join(self.data_dir, os.environ.get("EVAL_PHASE", self.phase) + ".txt")
         classaps = []
         map = 0
         for classname in self.category:
